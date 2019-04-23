@@ -48,7 +48,7 @@ bot.on('message', function(user, userID, channelID, message, evt){
             //!skip / !s
             //!back / !b
             //!clear / !c
-            //!jump[track position/title] /!j
+            //!jump[track position/title] /!ju
             //!loop / !l
             //!lyrics / !ly / !lyrics[query]
             //!pause / !ps
@@ -64,7 +64,8 @@ bot.on('message', function(user, userID, channelID, message, evt){
             //!seek[position]
             //!playlist[name] / !pl
 
-
+            //!join / !j
+            //!leave / !le
             //!prefix / !prefix[new prefix]
             //!perms[role/user]
             //!commands / !co
