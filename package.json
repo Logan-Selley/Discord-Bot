@@ -4,5 +4,11 @@
     "description": "Personal Bot",
     "main": "bot.js",
     "author": "Logan Selley",
-    "dependencies": {}
+    "dependencies": {
+        "discord.io": "^2.5.3",
+        "html-entities": "^1.2.1",
+        "node-spotify-api": "^1.1.1",
+        "winston": "^3.2.1",
+        "ytsearcher": "^1.2.2"
+    }
 }
