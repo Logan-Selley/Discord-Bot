@@ -1,6 +1,14 @@
 var Discord = require('discord.io');
+var axios = require('axios');
 var logger = require('winston');
 var auth = require('./auth.json');
+var ytpl = require('ytpl');
+const { YTSearcher } = require('ytsearcher');
+var spotify = require('node-spotify-api');
+const fs = require('fs');
+const ytdl = require('ytdl-core');
+
+
 // logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
@@ -32,6 +40,34 @@ bot.on('message', function(user, userID, channelID, message, evt){
                     to:ChannelSplitterNode,
                     message:'Pong!'
                 });
+
+            // Spotify API
+
+            //!play[link / search] / !p
+            //!queue / !q
+            //!skip / !s
+            //!back / !b
+            //!clear / !c
+            //!jump[track position/title] /!j
+            //!loop / !l
+            //!lyrics / !ly / !lyrics[query]
+            //!pause / !ps
+            //!resume / !r
+            //!remove[track position or title] / !re
+            //!removerange[start], [end] / !rr
+            //!reset
+            //!shuffle / !sh
+            //!song / !nowplaying / !np !song[song]
+            //!volume[new volume] / !v
+            //!search[queury] / !se
+            //!stop / !st
+            //!seek[position]
+            //!playlist[name] / !pl
+
+
+            //!prefix / !prefix[new prefix]
+            //!perms[role/user]
+            //!commands / !co
             break
         }
     }
