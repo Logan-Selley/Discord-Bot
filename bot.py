@@ -1,5 +1,6 @@
 import discord
 import spotipy
+import random
 from discord.ext import commands
 
 '''
@@ -33,7 +34,7 @@ youtube = None
 prefix = '!'
 '''Queue storage'''
 queue = None
-bot = commands.Bot(command_prefix=prefix)
+bot = commands.Bot(command_prefix=prefix,  case_insensitive=True)
 
 
 @bot.command()
@@ -87,7 +88,7 @@ async def lyrics(ctx, arg):
 @bot.coommand()
 async def ly(self, ctx, arg):
     self.lyrics(ctx, arg)
-bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XL9N-g.tba2fsgHUHlP6A0kejPLWJeelMw')
+
 
 
 @bot.command()
@@ -95,4 +96,16 @@ async def commands(ctx):
 
 
 @bot.command()
-async def help(self, ctx)
+async def help(self, ctx):
+
+
+
+@bot.command()
+async def shuffle(self, ctx):
+
+
+@bot.command()
+
+
+
+bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XL9N-g.tba2fsgHUHlP6A0kejPLWJeelMw')
