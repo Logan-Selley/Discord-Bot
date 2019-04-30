@@ -1,6 +1,7 @@
 import discord
 import spotipy
 import random
+import asyncio
 from discord.ext import commands
 
 '''
@@ -33,9 +34,13 @@ spotify = None
 youtube = None
 prefix = '!'
 '''Queue storage'''
-queue = None
+queue = asyncio.Queue()
+play_next = asyncio.Event()
 bot = commands.Bot(command_prefix=prefix,  case_insensitive=True)
 
+@bot.event
+async def on_ready():
+    print('bot ready')
 
 @bot.command()
 async def ping(ctx):
@@ -43,7 +48,7 @@ async def ping(ctx):
 
 
 ''' Not working '''
-@bot.command()
+@bot.command(pass_context = True)
 async def pre(ctx, fix):
     await ctx.send('Prefix changed to: ' + fix)
     global bot
@@ -51,7 +56,7 @@ async def pre(ctx, fix):
     return bot
 
 
-@bot.command()
+@bot.command(pass_context = True, name = 'play', aliases=['p', 'Test', 'P'])
 async def play(ctx, term, var):
     url = None
     if term=="top":
@@ -63,49 +68,53 @@ async def play(ctx, term, var):
     else:
         url = term
 
+    if not bot.is_voice_connected(ctx.message.server):
+        voice = await bot.join_voice_channel(ctx.message.author.voice_channel)
+    else:
+        voice = bot.voice_client_in(ctx.message.server)
 
-@bot.command()
-async def p(self, ctx, term, var):
-    self.play(ctx, term, var)
+    player = await voice.create_ytdl_player(url, after=toggle_next)
+    await queue.put(player)
+
+async def audio_player_task():
+    while True:
+        play_next.clear()
+        current = await queue.get()
+        current.start()
+        await play_next.wait()
+
+
+def toggle_next():
+    bot.loop.call_soon_threadsafe(play_next.set)
+
 
 @bot.command()
 async def queue(ctx):
-
-
-@bot.command()
-async def q(self, ctx):
-    self.queue(ctx)
+    print('queue')
 
 
 @bot.command()
 async def lyrics(ctx, arg):
     if arg is None:
-
+        print('given song lyrics')
     else:
-
-
-
-@bot.coommand()
-async def ly(self, ctx, arg):
-    self.lyrics(ctx, arg)
-
+        print('current lyrics')
 
 
 @bot.command()
 async def commands(ctx):
+    print('commands')
 
 
 @bot.command()
 async def help(self, ctx):
-
+    print('help')
 
 
 @bot.command()
 async def shuffle(self, ctx):
+    print('shuffle')
 
-
-@bot.command()
-
-
+bot.loop.create_task(audio_player_task())
 
 bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XL9N-g.tba2fsgHUHlP6A0kejPLWJeelMw')
