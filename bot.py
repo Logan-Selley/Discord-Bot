@@ -3,6 +3,8 @@ import spotipy
 import random
 import asyncio
 from discord.ext import commands
+from discord.ext.commands import Bot
+from discord.voice_client import VoiceClient
 
 '''
     Commands to add:
@@ -42,13 +44,21 @@ bot = commands.Bot(command_prefix=prefix,  case_insensitive=True)
 async def on_ready():
     print('bot ready')
 
-@bot.command()
+
+@bot.command(pass_context=True, name='ping', aliases=['Ping'])
 async def ping(ctx):
     await ctx.send('pong')
 
 
+@bot.command(pass_context=True, name='join', aliases=['Join', 'j', 'J'])
+async def join(ctx):
+    author = ctx.message.author
+    channel = author.voice_channel
+    await bot.join_voice_channel(channel)
+
+
 ''' Not working '''
-@bot.command(pass_context = True)
+@bot.command(pass_context=True, name='pre', aliases=['Pre', 'prefix', 'Prefix'])
 async def pre(ctx, fix):
     await ctx.send('Prefix changed to: ' + fix)
     global bot
@@ -56,7 +66,7 @@ async def pre(ctx, fix):
     return bot
 
 
-@bot.command(pass_context = True, name = 'play', aliases=['p', 'Test', 'P'])
+@bot.command(pass_context=True, name='play', aliases=['p', 'Test', 'P'])
 async def play(ctx, term, var):
     url = None
     if term=="top":
@@ -75,6 +85,7 @@ async def play(ctx, term, var):
 
     player = await voice.create_ytdl_player(url, after=toggle_next)
     await queue.put(player)
+
 
 async def audio_player_task():
     while True:
