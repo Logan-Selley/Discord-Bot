@@ -3,7 +3,6 @@ import spotipy
 import random
 import asyncio
 from discord.ext import commands
-from discord.ext.commands import Bot
 from discord.voice_client import VoiceClient
 
 '''
@@ -55,6 +54,13 @@ async def join(ctx):
     author = ctx.message.author
     channel = author.voice_channel
     await bot.join_voice_channel(channel)
+
+
+@bot.command(pass_context=True, name='leave', aliases=['Leaev','l','L'])
+async def leave(ctx):
+    server = ctx.message.server
+    voice_client = bot.voice_client_in(server)
+    await voice_client.disconnect()
 
 
 ''' Not working '''
