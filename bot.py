@@ -1,9 +1,7 @@
 import discord
-import spotipy
 import random
-import asyncio
 from discord.ext import commands
-from discord.voice_client import VoiceClient
+from discord.utils import get
 
 '''
     Commands to add:
@@ -34,9 +32,8 @@ from discord.voice_client import VoiceClient
 spotify = None
 youtube = None
 prefix = '!'
+players = {}
 '''Queue storage'''
-queue = asyncio.Queue()
-play_next = asyncio.Event()
 bot = commands.Bot(command_prefix=prefix,  case_insensitive=True)
 
 @bot.event
@@ -44,27 +41,36 @@ async def on_ready():
     print('bot ready')
 
 
-@bot.command(pass_context=True, name='ping', aliases=['Ping'])
+@bot.command(pass_context=True, name='ping')
 async def ping(ctx):
     await ctx.send('pong')
 
 
-@bot.command(pass_context=True, name='join', aliases=['Join', 'j', 'J'])
+@bot.command(pass_context=True, name='join', aliases=['j'])
 async def join(ctx):
     author = ctx.message.author
-    channel = author.voice_channel
-    await bot.join_voice_channel(channel)
+    channel = author.voice.channel
+    if not channel:
+        await ctx.send("You are not connected to a voice channel")
+        return
+    if author.voice.afk:
+        await ctx.send("That's the afk channel fam I'm not going in there")
+        return
+    voice = get(bot.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
 
 
-@bot.command(pass_context=True, name='leave', aliases=['Leaev','l','L'])
+@bot.command(pass_context=True, name='leave', aliases=['l'])
 async def leave(ctx):
     server = ctx.message.server
-    voice_client = bot.voice_client_in(server)
+    voice_client = bot.voice.channel(server)
     await voice_client.disconnect()
 
 
-''' Not working '''
-@bot.command(pass_context=True, name='pre', aliases=['Pre', 'prefix', 'Prefix'])
+@bot.command(pass_context=True, name='pre', aliases=['prefix'])
 async def pre(ctx, fix):
     await ctx.send('Prefix changed to: ' + fix)
     global bot
@@ -72,37 +78,13 @@ async def pre(ctx, fix):
     return bot
 
 
-@bot.command(pass_context=True, name='play', aliases=['p', 'Test', 'P'])
-async def play(ctx, term, var):
-    url = None
-    if term=="top":
-        url = var
-
-    elif term=="topskip":
-        url = var
-
-    else:
-        url = term
-
-    if not bot.is_voice_connected(ctx.message.server):
-        voice = await bot.join_voice_channel(ctx.message.author.voice_channel)
-    else:
-        voice = bot.voice_client_in(ctx.message.server)
-
-    player = await voice.create_ytdl_player(url, after=toggle_next)
-    await queue.put(player)
-
-
-async def audio_player_task():
-    while True:
-        play_next.clear()
-        current = await queue.get()
-        current.start()
-        await play_next.wait()
-
-
-def toggle_next():
-    bot.loop.call_soon_threadsafe(play_next.set)
+@bot.command(pass_context=True, name='play', aliases=['p'])
+async def play(ctx, url):
+    server = ctx.message.server
+    voice_client = bot.voice_client_in(server)
+    player = await voice_client.create_ytdl_player(url)
+    players[server.id] = player
+    player.start()
 
 
 @bot.command()
@@ -124,14 +106,7 @@ async def commands(ctx):
 
 
 @bot.command()
-async def help(self, ctx):
-    print('help')
-
-
-@bot.command()
 async def shuffle(self, ctx):
     print('shuffle')
-
-bot.loop.create_task(audio_player_task())
 
 bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XL9N-g.tba2fsgHUHlP6A0kejPLWJeelMw')
