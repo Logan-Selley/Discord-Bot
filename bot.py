@@ -7,9 +7,9 @@ from discord.ext import commands
 
 '''
     Commands to add:
-        change prefix                       !pre                                        In Progress
+        change prefix                       !pre                                        BROKEN
         youtube/spotify play/search         !p  !play [required argument]               1.5/3
-        queue                               !q  !queue                                  In Progress
+        queue                               !q  !queue                                  UGLY BUT WORKING
         lyrics of now playing/given song    !ly !lyrics [optional argument]
         display all commands                !help
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
@@ -18,13 +18,13 @@ from discord.ext import commands
         remove song                         !re !remove [required argument]
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
-        skip/skipto                         !s  !skip   [optional argument]             1/2 NEEDS TESTING
+        skip/skipto                         !s  !skip   [optional argument]             1/2 BROKEN
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
         move song position in queue         !move   [required argument] [required argument]
-        clear queue                         !c  !clear                                  NEEDS TESTING
+        clear queue                         !c  !clear                                  BROKEN
         remove duplicates                   !dupe   !d
         volume                              !v  !volume     [required argument]         COMPLETE
-        shuffle                             !shuff  !shuffle                            NEEDS TESTING
+        shuffle                             !shuff  !shuffle                            BROKEN
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         
@@ -83,6 +83,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 class Music(commands.Cog):
     songs = asyncio.Queue()
+    userQueue = []
     play_next = asyncio.Event()
     voice = None
     server = None
@@ -97,6 +98,7 @@ class Music(commands.Cog):
             self.play_next.clear()
             self.player = await self.songs.get()
             self.voice.play(self.player, after=lambda e: print('Player error: %s' % e) if e else None)
+            self.userQueue.remove(self.player.title)
             await self.server.send('Now playing: {}'.format(self.player.title))
             await self.play_next.wait()
 
@@ -115,7 +117,7 @@ class Music(commands.Cog):
         if voice and voice.is_connected():
             await voice.move_to(channel)
         else:
-            voice = await channel.connect()
+            await channel.connect()
 
     @commands.command(pass_context=True, name='leave', aliases=['l'])
     async def leave(self, ctx):
@@ -126,6 +128,8 @@ class Music(commands.Cog):
     async def play(self, ctx, url):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
+            await ctx.send('Enqueued: {}'.format(player.title))
+            self.userQueue.append(player.title)
             await self.songs.put(player)
         self.voice = ctx.voice_client
         self.server = ctx
@@ -163,7 +167,7 @@ class Music(commands.Cog):
     # How the fuck do I do this
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
-        ctx.send(self.songs)
+        await ctx.send(self.userQueue)
 
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
@@ -182,7 +186,8 @@ class Music(commands.Cog):
 
     @commands.command(name='clear', aliases=['c'])
     async def clear(self):
-        self.songs = asyncio.Queue()
+        while not self.songs.empty():
+            await self.songs.get()
 
     @commands.command(name='shuffle', aliases=['sh'])
     async def shuffle(self, ctx):
