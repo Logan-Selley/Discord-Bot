@@ -100,9 +100,6 @@ class Music(commands.Cog):
             await self.server.send('Now playing: {}'.format(self.player.title))
             await self.play_next.wait()
 
-    def toggle_next(self):
-        bot.loop.call_soon_threadsafe(self.play_next.set)
-
     @commands.command(pass_context=True, name='join', aliases=['j'])
     async def join(self, ctx):
         author = ctx.message.author
@@ -179,6 +176,19 @@ class Music(commands.Cog):
         except AttributeError:
             await ctx.send('Not currently playing')
 
+    @commands.command(name='clear', aliases=['c'])
+    async def clear(self):
+        self.songs = asyncio.Queue()
+
+    @commands.command(name='shuffle', aliases=['sh'])
+    async def shuffle(self, ctx):
+        await ctx.send('Shuffling...')
+        shuff = []
+        while not self.songs.empty():
+            shuff.append(self.songs.get())
+        random.shuffle(shuff)
+        self.songs = shuff
+        await ctx.send('shuffled!')
 
 
 
@@ -208,10 +218,6 @@ async def lyrics(ctx, arg):
     else:
         print('current lyrics')
 
-
-@bot.command()
-async def shuffle(self, ctx):
-    print('shuffle')
 
 bot.add_cog(Music(bot))
 bot.run('')
