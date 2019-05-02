@@ -49,8 +49,9 @@ async def ping(ctx):
 @bot.command(pass_context=True, name='join', aliases=['j'])
 async def join(ctx):
     author = ctx.message.author
-    channel = author.voice.channel
-    if not channel:
+    try:
+        channel = author.voice.channel
+    except:
         await ctx.send("You are not connected to a voice channel")
         return
     if author.voice.afk:
@@ -65,9 +66,8 @@ async def join(ctx):
 
 @bot.command(pass_context=True, name='leave', aliases=['l'])
 async def leave(ctx):
-    server = ctx.message.server
-    voice_client = bot.voice.channel(server)
-    await voice_client.disconnect()
+    voice = get(bot.voice_clients, guild=ctx.guild)
+    await voice.disconnect()
 
 
 @bot.command(pass_context=True, name='pre', aliases=['prefix'])
