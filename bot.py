@@ -18,13 +18,13 @@ from discord.ext import commands
         remove song                         !re !remove [required argument]
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
-        skip/skipto                         !s  !skip   [optional argument]             1/2
+        skip/skipto                         !s  !skip   [optional argument]             1/2 NEEDS TESTING
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
         move song position in queue         !move   [required argument] [required argument]
-        clear queue                         !c  !clear
+        clear queue                         !c  !clear                                  NEEDS TESTING
         remove duplicates                   !dupe   !d
         volume                              !v  !volume     [required argument]         COMPLETE
-        shuffle                             !shuff  !shuffle
+        shuffle                             !shuff  !shuffle                            NEEDS TESTING
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         
@@ -160,14 +160,18 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         ctx.voice_client.stop()
 
+    # How the fuck do I do this
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
         ctx.send(self.songs)
 
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
-        self.voice.stop()
-        self.play_next.set()
+        try:
+            self.voice.stop()
+            self.play_next.set()
+        except:
+            ctx.send("nothing to skip")
 
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
@@ -183,12 +187,37 @@ class Music(commands.Cog):
     @commands.command(name='shuffle', aliases=['sh'])
     async def shuffle(self, ctx):
         await ctx.send('Shuffling...')
-        shuff = []
-        while not self.songs.empty():
-            shuff.append(self.songs.get())
+        shuff = self.queue_to_list()
         random.shuffle(shuff)
-        self.songs = shuff
+        await self.list_to_queue(shuff)
         await ctx.send('shuffled!')
+
+    async def queue_to_list(self):
+        arr = []
+        while not self.songs.empty():
+            arr.append(await self.songs.get())
+        return arr
+
+    async def list_to_queue(self, arr):
+        queue = asyncio.Queue()
+        for item in arr:
+            await queue.put(item)
+        self.songs = queue
+
+    @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
+    async def skipto(self, ctx, index: int):
+        if index is None:
+            await ctx.send('No index given')
+        else:
+            arr = self.queue_to_list()
+            if index > len(arr):
+                await ctx.send('Not enough songs to skip!')
+            elif index == 1:
+                await self.skip
+            else:
+                del arr[:index]
+                await self.list_to_queue(arr)
+
 
 
 
