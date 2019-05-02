@@ -71,7 +71,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.url = data.get('url')
 
-
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
@@ -99,7 +98,7 @@ class Music(commands.Cog):
         if author.voice.afk:
             await ctx.send("That's the afk channel fam I'm not going in there")
             return
-        voice = get(bot.voice_clients, guild=ctx.guild)
+        voice = ctx.voice_client
         if voice and voice.is_connected():
             await voice.move_to(channel)
         else:
@@ -107,16 +106,33 @@ class Music(commands.Cog):
 
     @commands.command(pass_context=True, name='leave', aliases=['l'])
     async def leave(self, ctx):
-        voice = get(bot.voice_clients, guild=ctx.guild)
+        voice = ctx.voice_client
         await voice.disconnect()
 
-    @commands.command(pass_context=True, name='play', aliases=['p'])
+    @commands.command(pass_context=True, name='plays', aliases=['p'])
     async def play(self, ctx, url):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
             ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
         await ctx.send('Now playing: {}'.format(player.title))
+
+    @play.before_invoke
+    async def ensure_voice(self, ctx):
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send("You are not connected to a voice channel")
+                raise commands.CommandError("Author not connected to a voice channel")
+
+    @commands.command(pass_context=True, name='play', aliases=['v'])
+    async def volume(self, ctx, volume: int):
+        if ctx.voice_client is None:
+            return await ctx.send("Not connected to a voice channel")
+
+        ctx.voice_client.source.volume = volume/100
+        await ctx.voice_client.disconnect()
 
 
 @bot.event
@@ -130,16 +146,12 @@ async def ping(ctx):
     await ctx.send('pong')
 
 
-
-
-
 @bot.command(pass_context=True, name='pre', aliases=['prefix'])
 async def pre(ctx, fix):
     await ctx.send('Prefix changed to: ' + fix)
     global bot
     bot = commands.Bot(command_prefix=fix)
     return bot
-
 
 
 @bot.command()
