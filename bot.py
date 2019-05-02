@@ -140,8 +140,11 @@ class Music(commands.Cog):
 
     @commands.command(pass_context=True, name='resume', aliases=['r'])
     async def resume(self, ctx):
-        if not ctx.voice_client.is_playing:
-            ctx.voice_client.play()
+        ctx.voice_client.resume()
+
+    @commands.command(pass_context=True, name='stop', aliases=['st'])
+    async def stop(self, ctx):
+        ctx.voice_client.stop()
 
 
 @bot.event
@@ -181,4 +184,4 @@ async def shuffle(self, ctx):
     print('shuffle')
 
 bot.add_cog(Music(bot))
-bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XL9N-g.tba2fsgHUHlP6A0kejPLWJeelMw')
+bot.run('NTcwMTIxNzQzODk3ODUzOTgw.XMsn4g.Cee1NTgO9TSTa7TaumWeJl_f53A')
