@@ -109,7 +109,7 @@ class Music(commands.Cog):
         voice = ctx.voice_client
         await voice.disconnect()
 
-    @commands.command(pass_context=True, name='plays', aliases=['p'])
+    @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, url):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
@@ -126,13 +126,22 @@ class Music(commands.Cog):
                 await ctx.send("You are not connected to a voice channel")
                 raise commands.CommandError("Author not connected to a voice channel")
 
-    @commands.command(pass_context=True, name='play', aliases=['v'])
+    @commands.command(pass_context=True, name='volume', aliases=['v'])
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel")
 
         ctx.voice_client.source.volume = volume/100
-        await ctx.voice_client.disconnect()
+
+    @commands.command(pass_context=True, name='pause', aliases=['pa'])
+    async def pause(self, ctx):
+        if ctx.voice_client.is_playing:
+            ctx.voice_client.pause()
+
+    @commands.command(pass_context=True, name='resume', aliases=['r'])
+    async def resume(self, ctx):
+        if not ctx.voice_client.is_playing:
+            ctx.voice_client.play()
 
 
 @bot.event
