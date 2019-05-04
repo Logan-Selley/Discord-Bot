@@ -147,10 +147,17 @@ class Music(commands.Cog):
         else:
             await channel.connect()
 
+    @commands.guild_only()
     @commands.command(pass_context=True, name='leave', aliases=['l'])
     async def leave(self, ctx):
         voice = ctx.voice_client
-        await voice.disconnect()
+        state = self.get_state(ctx.guild)
+        if voice and voice.channel:
+            await voice.disconnect()
+            state.playlist = []
+            state.now_playing = None
+        else:
+            raise commands.CommandError("Not in a voice channel")
 
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, url):
