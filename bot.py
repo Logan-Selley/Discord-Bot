@@ -8,8 +8,8 @@ from discord.ext import commands
 '''
     Commands to add:
         change prefix                       !pre                                        BROKEN
-        youtube/spotify play/search         !p  !play [required argument]               1.5/3
-        queue                               !q  !queue                                  UGLY BUT WORKING
+        youtube/spotify play/search         !p  !play [required argument]               IN PROGRESS
+        queue                               !q  !queue                                  NEEDS TESTING
         lyrics of now playing/given song    !ly !lyrics [optional argument]
         display all commands                !help
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
@@ -18,13 +18,13 @@ from discord.ext import commands
         remove song                         !re !remove [required argument]
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
-        skip/skipto                         !s  !skip   [optional argument]             1/2 BROKEN
+        skip/skipto                         !s  !skip   [optional argument]             IN PROGRESS
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
         move song position in queue         !move   [required argument] [required argument]
-        clear queue                         !c  !clear                                  BROKEN
+        clear queue                         !c  !clear                                  NEEDS TESTING
         remove duplicates                   !dupe   !d
         volume                              !v  !volume     [required argument]         COMPLETE
-        shuffle                             !shuff  !shuffle                            BROKEN
+        shuffle                             !shuff  !shuffle                            IN PROGRESS
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         
