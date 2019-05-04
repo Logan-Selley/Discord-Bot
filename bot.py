@@ -61,6 +61,14 @@ prefix = '!'
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix),  case_insensitive=True)
 
 
+class GuildState:
+
+    def __init__(self):
+        self.volume = 1.0
+        self.playlist = []
+        self.now_playing = None
+
+
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
@@ -99,16 +107,19 @@ async def in_voice(ctx):
 
 
 class Music(commands.Cog):
-    songs = asyncio.Queue()
-    userQueue = []
-    play_next = asyncio.Event()
-    voice = None
-    server = None
-    player = None
 
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.audio_player_task())
+        self.states = {}
+
+    def get_state(self, guild):
+        # Gets or creates the state for the given guild
+        if guild.id in self.states:
+            return self.states[guild.id]
+        else:
+            self.states[guild.id] = GuildState()
+            return self.states[guild.id]
 
     async def audio_player_task(self):
         while True:
