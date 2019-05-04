@@ -170,15 +170,6 @@ class Music(commands.Cog):
         self.server = ctx
         await ctx.message.delete()
 
-    @play.before_invoke
-    async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-            else:
-                await ctx.send("You are not connected to a voice channel")
-                raise commands.CommandError("Author not connected to a voice channel")
-
     @commands.command(pass_context=True, name='volume', aliases=['v'])
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
@@ -187,6 +178,9 @@ class Music(commands.Cog):
             volume = 0
         ctx.voice_client.source.volume = volume/100
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(pass_context=True, name='pause', aliases=['pa'])
     async def pause(self, ctx):
         if ctx.voice_client.is_playing:
@@ -200,10 +194,23 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         ctx.voice_client.stop()
 
-    # How the fuck do I do this
+    @commands.guild_only()
+    @commands.check(audio_playing)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
-        await ctx.send(self.userQueue)
+        state = self.get_state(ctx.guild)
+        await ctx.send(self._queue_text(state.playlist))
+
+    def _queue_text(self, queue):
+        if len(queue) > 0:
+            message = [f"{len(queue)} songs in queue:"]
+            message += [
+                f"  {index+1}. **{song.title}** (requested by **{song.requested_by.name}**)"
+                for (index, song) in enumerate(queue)
+            ]
+            return "\n".join(message)
+        else:
+            return "The queue is empty"
 
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
@@ -220,46 +227,21 @@ class Music(commands.Cog):
         except AttributeError:
             await ctx.send('Not currently playing')
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
     @commands.command(name='clear', aliases=['c'])
-    async def clear(self):
-        while not self.songs.empty():
-            await self.songs.get()
+    async def clear(self, ctx):
+        state = self.get_state(ctx.guild)
+        state.playlist = []
 
     @commands.command(name='shuffle', aliases=['sh'])
     async def shuffle(self, ctx):
         await ctx.send('Shuffling...')
-        shuff = self.queue_to_list()
-        random.shuffle(shuff)
-        await self.list_to_queue(shuff)
-        await ctx.send('shuffled!')
-
-    async def queue_to_list(self):
-        arr = []
-        while not self.songs.empty():
-            arr.append(await self.songs.get())
-        return arr
-
-    async def list_to_queue(self, arr):
-        queue = asyncio.Queue()
-        for item in arr:
-            await queue.put(item)
-        self.songs = queue
 
     @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
     async def skipto(self, ctx, index: int):
         if index is None:
             await ctx.send('No index given')
-        else:
-            arr = self.queue_to_list()
-            if index > len(arr):
-                await ctx.send('Not enough songs to skip!')
-            elif index == 1:
-                await self.skip
-            else:
-                del arr[:index]
-                await self.list_to_queue(arr)
-
-
 
 
 @bot.event
@@ -279,14 +261,6 @@ async def pre(ctx, fix):
     global bot
     bot = commands.Bot(command_prefix=fix)
     return bot
-
-
-@bot.command()
-async def lyrics(ctx, arg):
-    if arg is None:
-        print('given song lyrics')
-    else:
-        print('current lyrics')
 
 
 bot.add_cog(Music(bot))
