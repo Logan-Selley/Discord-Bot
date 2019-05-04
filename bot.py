@@ -81,6 +81,23 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
+async def audio_playing(ctx):
+    client = ctx.voice_client
+    if client and client.channel and client.source:
+        return True
+    else:
+        raise commands.CommandError("Not currently playing audio")
+
+
+async def in_voice(ctx):
+    voice = ctx.author.voice
+    bot_voice = ctx.voice_client
+    if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
+        return True
+    else:
+        raise commands.CommandError("You need to be in the channel to do that")
+
+
 class Music(commands.Cog):
     songs = asyncio.Queue()
     userQueue = []
@@ -148,7 +165,8 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel")
-
+        if volume < 0:
+            volume = 0
         ctx.voice_client.source.volume = volume/100
 
     @commands.command(pass_context=True, name='pause', aliases=['pa'])
