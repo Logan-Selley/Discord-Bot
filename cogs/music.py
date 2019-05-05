@@ -3,7 +3,9 @@ import random
 import youtube_dl
 import asyncio
 import spotipy
+import logging
 from discord.ext import commands
+from video import Video
 
 
 '''
@@ -47,12 +49,6 @@ ytdl_format_options = {
     'default_search': 'auto',
     'source_address': '0.0.0.0'
 }
-
-ffmpeg_options = {
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 '''API keys'''
 spotify = None
@@ -148,20 +144,47 @@ class Music(commands.Cog):
         else:
             raise commands.CommandError("Not in a voice channel")
 
+    @commands.check(in_voice)
+    @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, url):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
 
+        if voice and voice.channel:
+            try:
+                video = Video(url, ctx.author)
+            except youtube_dl.DownloadError as e:
+                logging.warn(f"Error downloading video: {e}")
+                await ctx.send(
+                    "There was an error donwloading your video"
+                )
+                return
+            state.playlist.append(video)
+            message = await ctx.send(
+                "Added to queue.", embed=video.get_embed()
+            )
+            if voice.source:
+                self._play_song(voice, state, video)
+                message = await ctx.send("", embed=video.get_embed())
+                logging.info(f"Now Playing '{video.title}}")
+        else:
+            raise commands.CommandError(
+                "I'm not in a voice channel yet!"
+            )
 
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop)
-            await ctx.send('Enqueued: {}'.format(player.title))
-            self.userQueue.append(player.title)
-            await self.songs.put(player)
-        self.voice = ctx.voice_client
-        self.server = ctx
-        await ctx.message.delete()
+    def _play_song(self, voice, state, song):
+        state.now_playing = song
+        source = discord.PCMVolumeTransformer(
+            discord.FFmpegPCMAudio(song.stream_url), volume=state.volume
+        )
+
+        def after_playing(err):
+            if len(state.playlist) > 0:
+                next_song = state.playlist.pop(0)
+                self._play_song(voice, state, next_song)
+
+        voice.play(source, after=after_playing)
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -218,11 +241,7 @@ class Music(commands.Cog):
 
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
-        try:
-            self.voice.stop()
-            self.play_next.set()
-        except:
-            ctx.send("nothing to skip")
+        ctx.send("nothing to skip")
 
     @commands.guild_only()
     @commands.check(audio_playing)
