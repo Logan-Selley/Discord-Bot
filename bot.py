@@ -32,7 +32,7 @@ COGS = [music.Music]
 
 def add_cogs(bot):
     for cog in COGS:
-        bot.load_extension(cog(bot, cfg))
+        bot.load_extension(music.Music)
 
 
 def run():
