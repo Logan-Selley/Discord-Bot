@@ -59,9 +59,6 @@ spotify = None
 prefix = '!'
 
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix),  case_insensitive=True)
-
-
 class GuildState:
 
     def __init__(self):
@@ -253,26 +250,3 @@ class Music(commands.Cog):
     async def skipto(self, ctx, index: int):
         if index is None:
             await ctx.send('No index given')
-
-
-@bot.event
-async def on_ready():
-    print('Logged in as {0} ({0.id})'.format(bot.user))
-    print('------')
-
-
-@bot.command(pass_context=True, name='ping')
-async def ping(ctx):
-    await ctx.send('pong')
-
-
-@bot.command(pass_context=True, name='pre', aliases=['prefix'])
-async def pre(ctx, fix):
-    await ctx.send('Prefix changed to: ' + fix)
-    global bot
-    bot = commands.Bot(command_prefix=fix)
-    return bot
-
-
-bot.add_cog(Music(bot))
-bot.run('')
