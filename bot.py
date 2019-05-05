@@ -220,12 +220,12 @@ class Music(commands.Cog):
         except:
             ctx.send("nothing to skip")
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
-        try:
-            await ctx.send('Now playing: {}'.format(self.player.title))
-        except AttributeError:
-            await ctx.send('Not currently playing')
+        state = self.get_state(ctx.guild)
+        message = await ctx.send("", embbed=state.now_playing.get_embed())
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -234,9 +234,13 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         state.playlist = []
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
     @commands.command(name='shuffle', aliases=['sh'])
     async def shuffle(self, ctx):
-        await ctx.send('Shuffling...')
+        state = self.get_state(ctx.guild)
+        random.shuffle(state.playlist)
+        await ctx.send("Shuffled!")
 
     @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
     async def skipto(self, ctx, index: int):
