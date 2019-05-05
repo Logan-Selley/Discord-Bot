@@ -167,7 +167,7 @@ class Music(commands.Cog):
             if voice.source:
                 self._play_song(voice, state, video)
                 message = await ctx.send("", embed=video.get_embed())
-                logging.info(f"Now Playing '{video.title}}")
+                logging.info(f"Now Playing '{video.title}'")
         else:
             raise commands.CommandError(
                 "I'm not in a voice channel yet!"
