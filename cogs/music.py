@@ -49,9 +49,10 @@ class GuildState:
 
 async def audio_playing(ctx):
     client = ctx.voice_client
-    if client and client.channel and client.source:
+    if client and client.channel:
         return True
     else:
+        ctx.send("Not currently playing audio")
         raise commands.CommandError("Not currently playing audio")
 
 
@@ -61,6 +62,7 @@ async def in_voice(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
+        ctx.send("You need to be in the channel to do that")
         raise commands.CommandError("You need to be in the channel to do that")
 
 
