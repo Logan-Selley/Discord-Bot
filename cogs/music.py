@@ -188,10 +188,6 @@ class Music(commands.Cog):
     async def resume(self, ctx):
         ctx.voice_client.resume()
 
-    @commands.command(pass_context=True, name='stop', aliases=['st'])
-    async def stop(self, ctx):
-        ctx.voice_client.stop()
-
     @commands.guild_only()
     @commands.check(audio_playing)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
@@ -210,9 +206,14 @@ class Music(commands.Cog):
         else:
             return "The queue is empty"
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
-        ctx.send("nothing to skip")
+        state = self.get_state(ctx.guild)
+        voice = ctx.voice_client
+        voice.stop()
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -236,8 +237,24 @@ class Music(commands.Cog):
         random.shuffle(state.playlist)
         await ctx.send("Shuffled!")
 
+    @commands.guild_only()
+    @commands.check(in_voice)
+    @commands.check(audio_playing)
     @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
     async def skipto(self, ctx, index: int):
         if index is None:
             await ctx.send('No index given')
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name='move', aliases=['m'])
+    async def move(self, ctx, song: int, new_index: int):
+        state = self.get_state(ctx.guild)
+        if 1 <= song <= len(state.playlist) and 1 <= new_index:
+            song = state.playlist.pop(song - 1)  # take song at index...
+            state.playlist.insert(new_index - 1, song)  # and insert it.
+
+            await ctx.send(self._queue_text(state.playlist))
+        else:
+            raise commands.CommandError("You must use a valid index.")
