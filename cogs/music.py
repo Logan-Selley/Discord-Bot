@@ -22,13 +22,13 @@ import config
         remove song                         !re !remove [required argument]
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
-        skip/skipto                         !s  !skip   [optional argument]             IN PROGRESS
+        skip/skipto                         !s  !skip   [optional argument]             NEEDS TESTING
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
-        move song position in queue         !move   [required argument] [required argument]
+        move song position in queue         !move   [required argument] [required argument] NEEDS TESTING
         clear queue                         !c  !clear                                  NEEDS TESTING
         remove duplicates                   !dupe   !d
         volume                              !v  !volume     [required argument]         COMPLETE
-        shuffle                             !shuff  !shuffle                            IN PROGRESS
+        shuffle                             !shuff  !shuffle                            NEEDS TESTING
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         
@@ -242,8 +242,13 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
     async def skipto(self, ctx, index: int):
+        state = self.get_state(ctx.guild)
         if index is None:
             await ctx.send('No index given')
+        elif index < 1 or index > len(state.playlist):
+            await ctx.send('invalid index')
+        else:
+            state.playlist = state.playlist[index:]
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -258,3 +263,11 @@ class Music(commands.Cog):
             await ctx.send(self._queue_text(state.playlist))
         else:
             raise commands.CommandError("You must use a valid index.")
+
+    @commands.guild_only
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name='remove', aliases='r')
+    async def remove(self, ctx, index: int):
+        state = self.get_state(ctx.guild)
+        state.playlist
