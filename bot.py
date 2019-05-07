@@ -27,12 +27,13 @@ async def pre(ctx, fix):
     bot = commands.Bot(command_prefix=fix)
     return bot
 
-COGS = [music.Music]
+COGS = ['cogs.music']
 
 
 def add_cogs(bot):
+    print("cogs")
     for cog in COGS:
-        bot.load_extension(music.Music)
+        bot.load_extension(cog)
 
 
 def run():

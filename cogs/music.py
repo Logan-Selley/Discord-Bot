@@ -6,6 +6,7 @@ import spotipy
 import logging
 from discord.ext import commands
 from video import Video
+import config
 
 
 '''
@@ -34,8 +35,6 @@ from video import Video
         
 '''
 
-
-
 '''API keys'''
 spotify = None
 
@@ -63,6 +62,13 @@ async def in_voice(ctx):
         return True
     else:
         raise commands.CommandError("You need to be in the channel to do that")
+
+
+cfg = config.load_config()
+
+
+def setup(bot):
+    bot.add_cog(Music(bot, cfg))
 
 
 class Music(commands.Cog):
@@ -234,3 +240,4 @@ class Music(commands.Cog):
     async def skipto(self, ctx, index: int):
         if index is None:
             await ctx.send('No index given')
+
