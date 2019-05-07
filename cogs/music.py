@@ -13,7 +13,7 @@ import config
     Commands to add:
         change prefix                       !pre                                        BROKEN
         youtube/spotify play/search         !p  !play [required argument]               IN PROGRESS
-        queue                               !q  !queue                                  NEEDS TESTING
+        queue                               !q  !queue                                  COMPLETE
         lyrics of now playing/given song    !ly !lyrics [optional argument]
         display all commands                !help
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
