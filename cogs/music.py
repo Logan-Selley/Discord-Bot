@@ -12,10 +12,11 @@ import PyLyrics
 
 '''
     Commands to add:
-        change prefix                       !pre                                        BROKEN
-        youtube/spotify play/search         !p  !play [required argument]               IN PROGRESS
+        change prefix                        MOVED TO CONFIG
+        youtube/search                      !p  !play [required argument]               IN PROGRESS
+        Spotify/search                      !spot !sp                                   
         queue                               !q  !queue                                  COMPLETE
-        lyrics of now playing/given song    !ly !lyrics [optional argument]
+        lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TESTING SPOT INCOMPATIBLE
         display all commands                !help
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
@@ -35,10 +36,6 @@ import PyLyrics
         
         
 '''
-
-'''API keys'''
-spotify = None
-
 
 class GuildState:
 
@@ -129,7 +126,7 @@ class Music(commands.Cog):
             try:
                 video = Video(url, ctx.author)
             except youtube_dl.DownloadError as e:
-                logging.warn(f"Error downloading video: {e}")
+                logging.warning(f"Error downloading video: {e}")
                 await ctx.send(
                     "There was an error donwloading your video"
                 )

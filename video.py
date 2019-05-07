@@ -24,6 +24,7 @@ class Video:
             self.thumbnail = video[
                 "thumbnail"] if "thumbnail" in video else None
             self.requested_by = requested_by
+            self.origin = "ytdl"
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
@@ -46,3 +47,11 @@ class Video:
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         return embed
+
+
+class Spotify:
+
+    def __init__(self, url_or_search, requested_by):
+
+
+    def get_embed
