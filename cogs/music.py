@@ -244,11 +244,12 @@ class Music(commands.Cog):
     async def skipto(self, ctx, index: int):
         state = self.get_state(ctx.guild)
         if index is None:
-            await ctx.send('No index given')
+            raise commands.CommandError('No index given')
         elif index < 1 or index > len(state.playlist):
-            await ctx.send('invalid index')
+            raise commands.CommandError('invalid index')
         else:
             state.playlist = state.playlist[index:]
+            await ctx.send(self._queue_text(state.playlist))
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -270,4 +271,8 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='remove', aliases='r')
     async def remove(self, ctx, index: int):
         state = self.get_state(ctx.guild)
-        state.playlist
+        if index is None or index < 1 or index > len(state.playlist):
+            raise commands.CommandError("invalid index")
+        else:
+            state.playlist.remove(index)
+            await ctx.send(self._queue_text(state.playlist))
