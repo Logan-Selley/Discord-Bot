@@ -7,6 +7,7 @@ import logging
 from discord.ext import commands
 from video import Video
 import config
+import PyLyrics
 
 
 '''
@@ -278,3 +279,21 @@ class Music(commands.Cog):
         else:
             state.playlist.remove(index)
             await ctx.send(self._queue_text(state.playlist))
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
+    async def lyrics(self, ctx, arg):
+        state = self.get_state(ctx.guild)
+        if arg is None: # now playing lyrics
+            playing = state.now_playing
+            song = PyLyrics.Track(trackName=playing.title)
+            lyrics = song.getLyrics()
+            await ctx.send(lyrics)
+        else: # search lyrics
+            if isinstance(arg, int): # from queue
+                playing = state.playlist[arg]
+                song = PyLyrics.Track(trackName=playing.title)
+                await ctx.send(song.getLyrics())
+            else: # string input
+                song = PyLyrics.Track(trackName=arg)
+                await ctx.send(song.getLyrics())
