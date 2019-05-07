@@ -19,7 +19,7 @@ import config
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
         looping playlist/queue/song         !loop   [required argument]
-        remove song                         !re !remove [required argument]
+        remove song                         !re !remove [required argument]             NEEDS TESTING
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
         skip/skipto                         !s  !skip   [optional argument]             NEEDS TESTING
@@ -184,7 +184,7 @@ class Music(commands.Cog):
         if ctx.voice_client.is_playing:
             ctx.voice_client.pause()
 
-    @commands.command(pass_context=True, name='resume', aliases=['r'])
+    @commands.command(pass_context=True, name='resume', aliases=['re'])
     async def resume(self, ctx):
         ctx.voice_client.resume()
 
@@ -265,10 +265,10 @@ class Music(commands.Cog):
         else:
             raise commands.CommandError("You must use a valid index.")
 
-    @commands.guild_only
+    @commands.guild_only()
     @commands.check(audio_playing)
     @commands.check(in_voice)
-    @commands.command(pass_context=True, name='remove', aliases='r')
+    @commands.command(pass_context=True, name='remove', aliases=['r'])
     async def remove(self, ctx, index: int):
         state = self.get_state(ctx.guild)
         if index is None or index < 1 or index > len(state.playlist):
