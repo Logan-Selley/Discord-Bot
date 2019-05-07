@@ -52,6 +52,7 @@ class Video:
 class Spotify:
 
     def __init__(self, url_or_search, requested_by):
+        print()
 
-
-    def get_embed
+    def get_embed(self):
+        print()

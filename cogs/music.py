@@ -13,7 +13,7 @@ import PyLyrics
 '''
     Commands to add:
         change prefix                        MOVED TO CONFIG
-        youtube/search                      !p  !play [required argument]               IN PROGRESS
+        youtube/search                      !p  !play [required argument]               NEEDS TESTING
         Spotify/search                      !spot !sp                                   
         queue                               !q  !queue                                  COMPLETE
         lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TESTING SPOT INCOMPATIBLE
