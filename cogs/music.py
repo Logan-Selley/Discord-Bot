@@ -138,7 +138,7 @@ class Music(commands.Cog):
             message = await ctx.send(
                 "Added to queue.", embed=video.get_embed()
             )
-            if voice.source:
+            if not voice.source:
                 self._play_song(voice, state, video)
                 message = await ctx.send("", embed=video.get_embed())
                 logging.info(f"Now Playing '{video.title}'")
