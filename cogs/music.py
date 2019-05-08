@@ -14,27 +14,35 @@ import PyLyrics
     Commands to add:
         change prefix                        MOVED TO CONFIG
         youtube/search                      !p  !play [required argument]               NEEDS TESTING
-        Spotify/search                      !spot !sp                                   
+        Spotify/search                      !spot !sp                                   IN PROGRESS
         queue                               !q  !queue                                  COMPLETE
-        lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TESTING SPOT INCOMPATIBLE
+        lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TWEAKING SPOT INCOMPATIBLE
         display all commands                !help
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
         looping playlist/queue/song         !loop   [required argument]
-        remove song                         !re !remove [required argument]             NEEDS TESTING
+        remove song                         !re !remove [required argument]             IN PROGRESS
         seek to certain point of song       !seek   [required argument]
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
-        skip/skipto                         !s  !skip   [optional argument]             NEEDS TESTING
+        skip/skipto                         !s  !skip   [optional argument]             Skip done, Skipto needs tweaking
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
-        move song position in queue         !move   [required argument] [required argument] NEEDS TESTING
-        clear queue                         !c  !clear                                  NEEDS TESTING
+        move song position in queue         !move   [required argument] [required argument] COMPLETE
+        clear queue                         !c  !clear                                  COMPLETE
         remove duplicates                   !dupe   !d
         volume                              !v  !volume     [required argument]         COMPLETE
-        shuffle                             !shuff  !shuffle                            NEEDS TESTING
+        shuffle                             !shuff  !shuffle                            COMPLETE
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         
         
+        
+        testing notes
+        if not playing play adds first song twice
+        skip 2 doesn't skip currently playing song
+        skip 2 skips 1 too far
+        remove skips?
+        Lyrics not enough arguments
+        need to switch play to download mode
 '''
 
 class GuildState:
