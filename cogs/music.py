@@ -38,7 +38,9 @@ from lyrics_extractor import Song_Lyrics
         
         testing notes
         remove broken
-        Lyrics not enough arguments
+        Lyrics working, but bad request issue
+        play bug requires leave and rejoin to work
+        todo play combine args to not require quotes
 '''
 
 
@@ -301,11 +303,10 @@ class Music(commands.Cog):
             playing = state.now_playing
             title, lyrics = extract.get_lyrics(playing.title)
             await ctx.send(title + "\n" + lyrics)
-        else: # search lyrics
-            if isinstance(args[0], int): # from queue
-                playing = state.playlist[args[0]]
-                title, lyrics = extract.get_lyrics(playing.title)
-                await ctx.send(title + "\n" + lyrics)
-            else: # string input
-                title, lyrics = extract.get_lyrics(args[0])
-                await ctx.send(title + "\n" + lyrics)
+        else:  # search lyrics
+            song = ""
+            for a in args:
+                song += a
+                song += " "
+            title, lyrics = extract.get_lyrics(args[0])
+            await ctx.send(title + "\n" + lyrics)
