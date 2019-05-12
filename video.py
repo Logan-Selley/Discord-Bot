@@ -2,10 +2,10 @@ import youtube_dl as ytdl
 import discord
 
 YTDL_OPTS = {
-    "default_search": "ytsearch",
+    "default_search": "auto",
     "format": "bestaudio/best",
     "quiet": True,
-    "extract_flat": "in_playlist"
+    "extract_flat": "in_playlist",
 }
 
 

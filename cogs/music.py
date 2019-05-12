@@ -37,13 +37,12 @@ import PyLyrics
         
         
         testing notes
-        if not playing play adds first song twice
         skip 2 doesn't skip currently playing song
         skip 2 skips 1 too far
         remove skips?
         Lyrics not enough arguments
-        need to switch play to download mode
 '''
+
 
 class GuildState:
 
@@ -55,10 +54,11 @@ class GuildState:
 
 async def audio_playing(ctx):
     client = ctx.voice_client
-    if client and client.channel:
+    if client and client.channel and client.source:
+        await ctx.send("audio playing")
         return True
     else:
-        ctx.send("Not currently playing audio")
+        await ctx.send("Not currently playing audio")
         raise commands.CommandError("Not currently playing audio")
 
 
@@ -66,9 +66,10 @@ async def in_voice(ctx):
     voice = ctx.author.voice
     bot_voice = ctx.voice_client
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
+        await ctx.send("in voice")
         return True
     else:
-        ctx.send("You need to be in the channel to do that")
+        await ctx.send("You need to be in the channel to do that")
         raise commands.CommandError("You need to be in the channel to do that")
 
 
@@ -143,11 +144,14 @@ class Music(commands.Cog):
             message = await ctx.send(
                 "Added to queue.", embed=video.get_embed()
             )
+            await ctx.message.delete()
             if not voice.source:
                 self._play_song(voice, state, video)
+                state.playlist.pop(0)
                 message = await ctx.send("", embed=video.get_embed())
                 logging.info(f"Now Playing '{video.title}'")
         else:
+            await ctx.send("I'm not in a voice channel yet!")
             raise commands.CommandError(
                 "I'm not in a voice channel yet!"
             )
@@ -155,13 +159,15 @@ class Music(commands.Cog):
     def _play_song(self, voice, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(song.stream_url), volume=state.volume
+            discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'), volume=state.volume
         )
 
         def after_playing(err):
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
                 self._play_song(voice, state, next_song)
+            else:
+                state.now_playing = None
 
         voice.play(source, after=after_playing)
 
@@ -228,7 +234,7 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
         state = self.get_state(ctx.guild)
-        message = await ctx.send("", embbed=state.now_playing.get_embed())
+        message = await ctx.send("", embed=state.now_playing.get_embed())
 
     @commands.guild_only()
     @commands.check(audio_playing)
