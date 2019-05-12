@@ -37,9 +37,7 @@ import PyLyrics
         
         
         testing notes
-        skip 2 doesn't skip currently playing song
-        skip 2 skips 1 too far
-        remove skips?
+        remove broken
         Lyrics not enough arguments
 '''
 
@@ -258,11 +256,14 @@ class Music(commands.Cog):
     async def skipto(self, ctx, index: int):
         state = self.get_state(ctx.guild)
         if index is None:
+            await ctx.send("No index given")
             raise commands.CommandError('No index given')
         elif index < 1 or index > len(state.playlist):
+            await ctx.send("invalid index")
             raise commands.CommandError('invalid index')
         else:
-            state.playlist = state.playlist[index:]
+            state.playlist = state.playlist[index-1:]
+            ctx.voice_client.stop()
             await ctx.send(self._queue_text(state.playlist))
 
     @commands.guild_only()
