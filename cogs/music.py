@@ -7,7 +7,7 @@ import logging
 from discord.ext import commands
 from video import Video
 import config
-import PyLyrics
+from lyrics_extractor import Song_Lyrics
 
 
 '''
@@ -294,18 +294,18 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
-    async def lyrics(self, ctx, arg):
+    async def lyrics(self, ctx, *args):
         state = self.get_state(ctx.guild)
-        if arg is None: # now playing lyrics
+        extract = Song_Lyrics('AIzaSyCn62yfrwWvukFUpVwnQBAEw79-HhPmHs8', '016434240533881954973:pqcqh2kkktm')
+        if len(args) == 0:  # now playing lyrics
             playing = state.now_playing
-            song = PyLyrics.Track(trackName=playing.title)
-            lyrics = song.getLyrics()
-            await ctx.send(lyrics)
+            title, lyrics = extract.get_lyrics(playing.title)
+            await ctx.send(title + "\n" + lyrics)
         else: # search lyrics
-            if isinstance(arg, int): # from queue
-                playing = state.playlist[arg]
-                song = PyLyrics.Track(trackName=playing.title)
-                await ctx.send(song.getLyrics())
+            if isinstance(args[0], int): # from queue
+                playing = state.playlist[args[0]]
+                title, lyrics = extract.get_lyrics(playing.title)
+                await ctx.send(title + "\n" + lyrics)
             else: # string input
-                song = PyLyrics.Track(trackName=arg)
-                await ctx.send(song.getLyrics())
+                title, lyrics = extract.get_lyrics(args[0])
+                await ctx.send(title + "\n" + lyrics)
