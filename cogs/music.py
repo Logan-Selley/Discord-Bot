@@ -164,7 +164,8 @@ class Music(commands.Cog):
     def _play_song(self, voice, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'), volume=state.volume
+            discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                                          '-reconnect_delay_max 5'), volume=state.volume
         )
 
         def after_playing(err):
@@ -303,7 +304,7 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
     async def lyrics(self, ctx, *args):
         state = self.get_state(ctx.guild)
-        extract = Song_Lyrics('AIzaSyCn62yfrwWvukFUpVwnQBAEw79-HhPmHs8', '016434240533881954973:pqcqh2kkktm')
+        extract = Song_Lyrics(cfg["search_key"], cfg["search_id"])
         if len(args) == 0:  # now playing lyrics
             playing = state.now_playing
             title, lyrics = extract.get_lyrics(playing.title)

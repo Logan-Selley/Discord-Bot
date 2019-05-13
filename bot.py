@@ -38,7 +38,7 @@ async def help(ctx):
     commands[prefix + "queue"] = "display the current queue"
     commands[prefix + "clear"] = "clear the current queue"
     commands[prefix + "volume"] = "change the volume of music playback by setting a new volume value"
-    commands[prefix + "shuffle"] = "shuffles the current queue"s
+    commands[prefix + "shuffle"] = "shuffles the current queue"
     commands[prefix + "nowplaying"] = "display the current song plaaying"
     commands[prefix + "lyrics"] = "search and show the lyrics of the current song or the given search query"
 
@@ -49,14 +49,14 @@ async def help(ctx):
 
     msg = discord.Embed(title="temp", description="Bot written by Logan Selley in Python 3"
                                                   " using the discord.py library")
-    for command,description in commands.items():
+    for command, description in commands.items():
         msg.add_field(name=command, value=description, inline=False)
 
     await ctx.send(msg)
 
 
 @bot.command(pass_context=True, name='pre', aliases=['prefix'])
-async def pre(ctx, fix):
+async def pre(ctx):
     await ctx.send('Current prefix: ' + cfg["prefix"])
 
 COGS = ['cogs.music']
