@@ -38,8 +38,8 @@ from lyrics_extractor import Song_Lyrics
         
         testing notes
         remove broken
-        Lyrics working, but bad request issue
-        play bug requires leave and rejoin to work
+        Lyrics working, but bad request issue ???????
+        play bug requires leave and rejoin to work ?????
         todo play combine args to not require quotes maybe done
 '''
 
@@ -306,9 +306,12 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         extract = Song_Lyrics(cfg["search_key"], cfg["search_id"])
         if len(args) == 0:  # now playing lyrics
-            playing = state.now_playing
-            title, lyrics = extract.get_lyrics(playing.title)
-            await ctx.send(title + "\n" + lyrics)
+            if audio_playing(ctx):
+                playing = state.now_playing
+                title, lyrics = extract.get_lyrics(playing.title)
+                await ctx.send(title + "\n" + lyrics)
+            else:
+                await ctx.send("Nothing is playing currently, add a song title to the command to search")
         else:  # search lyrics
             song = ""
             for a in args:
