@@ -40,7 +40,7 @@ from lyrics_extractor import Song_Lyrics
         remove broken
         Lyrics working, but bad request issue
         play bug requires leave and rejoin to work
-        todo play combine args to not require quotes
+        todo play combine args to not require quotes maybe done
 '''
 
 
@@ -127,10 +127,15 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
-    async def play(self, ctx, url):
+    async def play(self, ctx, *args):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
-
+        url = ""
+        if len(args) > 1:
+            for term in args:
+                url += term + " "
+        else:
+            url = args[0]
         if voice and voice.channel:
             try:
                 video = Video(url, ctx.author)
