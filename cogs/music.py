@@ -347,8 +347,7 @@ class Music(commands.Cog):
             await ctx.send("no user given, add a username to delete their songs.")
         else:
             for song in state.playlist:
-                print(song.requested_by.name)
-                if song.requested_by.name == args[0]:
+                if song.requested_by.display_name == args[0]:
                     state.playlist.remove(song)
             await ctx.send("removed all songs requested by: " + args[0])
             self._queue_text(state.playlist)
