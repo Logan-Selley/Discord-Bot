@@ -296,10 +296,12 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='remove', aliases=['r'])
     async def remove(self, ctx, index: int):
         state = self.get_state(ctx.guild)
+        print(len(state.playlist))
+        print(index)
         if index is None or index < 1 or index > len(state.playlist):
             raise commands.CommandError("invalid index")
         else:
-            state.playlist.remove(index)
+            del state.playlist[index]
             await ctx.send(self._queue_text(state.playlist))
 
     @commands.guild_only()
@@ -332,5 +334,17 @@ class Music(commands.Cog):
         playlist = list(diction.values())
         state.playlist = playlist
         await ctx.send("Duplicates removed!")
+        self._queue_text(ctx)
 
-
+    @commands.guild_only()
+    @commands.command(pass_context=True, name='removeusersongs', aliases=['rus'])
+    async def remove_user_songs(self, ctx, *args):
+        state = self.get_state(ctx.guild)
+        if len(args) == 0:
+            await ctx.send("no user given, add a username to delete their songs.")
+        else:
+            for song in state.playlist:
+                if song.title == args[0]:
+                    state.playlist.remove(song)
+            await ctx.send("removed all songs requested by: " + args[0])
+            self._queue_text(ctx)

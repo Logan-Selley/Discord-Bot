@@ -59,7 +59,7 @@ async def help(ctx):
 async def pre(ctx):
     await ctx.send('Current prefix: ' + cfg["prefix"])
 
-COGS = ['cogs.music']
+COGS = ['cogs.music', 'cogs.ErrorHandler']
 
 
 def add_cogs(bot):
