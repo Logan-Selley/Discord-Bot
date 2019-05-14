@@ -52,7 +52,7 @@ async def help(ctx):
     for command, description in commands.items():
         msg.add_field(name=command, value=description, inline=False)
 
-    await ctx.send(msg)
+    await ctx.send("", embed=msg)
 
 
 @bot.command(pass_context=True, name='pre', aliases=['prefix'])
