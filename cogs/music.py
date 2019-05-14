@@ -39,10 +39,7 @@ from lyrics_extractor import Song_Lyrics
         
         
         testing notes
-        remove broken
         Lyrics working, but bad request issue ???????
-        play bug requires leave and rejoin to work ?????
-        todo play combine args to not require quotes maybe done
 '''
 
 
