@@ -56,7 +56,7 @@ class GuildState:
 async def audio_playing(ctx):
     client = ctx.voice_client
     if client and client.channel and client.source:
-        await ctx.send("audio playing")
+        # await ctx.send("audio playing")
         return True
     else:
         await ctx.send("Not currently playing audio")
@@ -67,7 +67,7 @@ async def in_voice(ctx):
     voice = ctx.author.voice
     bot_voice = ctx.voice_client
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
-        await ctx.send("in voice")
+        # await ctx.send("in voice")
         return True
     else:
         await ctx.send("You need to be in the channel to do that")
@@ -148,13 +148,13 @@ class Music(commands.Cog):
                 return
             state.playlist.append(video)
             message = await ctx.send(
-                "Added to queue.", embed=video.get_embed()
+                "Added to queue:", embed=video.get_embed()
             )
             await ctx.message.delete()
             if not voice.source:
                 self._play_song(voice, state, video)
                 state.playlist.pop(0)
-                message = await ctx.send("", embed=video.get_embed())
+                message = await ctx.send("Now Playing:", embed=video.get_embed())
                 logging.info(f"Now Playing '{video.title}'")
         else:
             await ctx.send("I'm not in a voice channel yet!")
@@ -241,7 +241,7 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
         state = self.get_state(ctx.guild)
-        message = await ctx.send("", embed=state.now_playing.get_embed())
+        message = await ctx.send("Now Playing: ", embed=state.now_playing.get_embed())
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -326,6 +326,11 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='duplicates', aliases=['d', 'dupe'])
     async def duplicate(self, ctx):
         state = self.get_state(ctx.guild)
-        playlist = state.playlist
-        dic = list(dict.fromkeys(playlist))
-        state.playlist = dic
+        diction = {}
+        for song in state.playlist:
+            diction[song.title] = song
+        playlist = list(diction.values())
+        state.playlist = playlist
+        await ctx.send("Duplicates removed!")
+
+
