@@ -41,7 +41,7 @@ async def help(ctx):
     commands[prefix + "shuffle"] = "shuffles the current queue"
     commands[prefix + "nowplaying"] = "display the current song plaaying"
     commands[prefix + "lyrics"] = "search and show the lyrics of the current song or the given search query"
-
+    commands[prefix + "dupe"] = "remove  duplicate items from music queue"
     # GENERAL
     commands[prefix + "help"] = "You just called this command, congrats"
     commands[prefix + "ping"] = "test the bot's responsiveness"

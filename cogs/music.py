@@ -18,7 +18,7 @@ from lyrics_extractor import Song_Lyrics
         Spotify/search                      !spot !sp                                   IN PROGRESS
         queue                               !q  !queue                                  COMPLETE
         lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TWEAKING SPOT INCOMPATIBLE
-        display all commands                !help
+        display all commands                !help                                       NEEDS TESTING (SHOULD WORK)
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
         looping playlist/queue/song         !loop   [required argument]
