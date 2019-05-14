@@ -324,12 +324,8 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='duplicates', aliases=['d', 'dupe'])
-    async def lyrics(self, ctx):
+    async def duplicate(self, ctx):
         state = self.get_state(ctx.guild)
         playlist = state.playlist
-        sets = set()
-        for song in playlist:
-            if song in sets:
-                playlist.pop(song)
-            else:
-                sets.add(song)
+        dic = list(dict.fromkeys(playlist))
+        state.playlist = dic
