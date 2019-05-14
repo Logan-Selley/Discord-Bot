@@ -324,6 +324,8 @@ class Music(commands.Cog):
             await ctx.send(title + "\n" + lyrics)
 
     @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(pass_context=True, name='duplicates', aliases=['d', 'dupe'])
     async def duplicate(self, ctx):
         state = self.get_state(ctx.guild)
@@ -336,6 +338,8 @@ class Music(commands.Cog):
         self._queue_text(state.playlist)
 
     @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(pass_context=True, name='removeusersongs', aliases=['rus'])
     async def remove_user_songs(self, ctx, *args):
         state = self.get_state(ctx.guild)
@@ -343,7 +347,8 @@ class Music(commands.Cog):
             await ctx.send("no user given, add a username to delete their songs.")
         else:
             for song in state.playlist:
-                if song.title == args[0]:
+                print(song.requested_by.name)
+                if song.requested_by.name == args[0]:
                     state.playlist.remove(song)
             await ctx.send("removed all songs requested by: " + args[0])
             self._queue_text(state.playlist)
