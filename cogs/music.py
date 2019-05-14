@@ -34,6 +34,7 @@ from lyrics_extractor import Song_Lyrics
         shuffle                             !shuff  !shuffle                            COMPLETE
         play: add to top of queue           !p/!play [required argument] [required argument]
         play: add to top of queue and skip current  !p/!play [required argument] [required argument]
+        removeusersongs                     !rus remove songs requested by given user (works with nicknames)        COMPLETE
         
         
         
@@ -252,7 +253,7 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.check(audio_playing)
-    @commands.command(name='shuffle', aliases=['sh'])
+    @commands.command(name='shuffle', aliases=['sh', 'shuff'])
     async def shuffle(self, ctx):
         state = self.get_state(ctx.guild)
         random.shuffle(state.playlist)
@@ -262,7 +263,7 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.check(in_voice)
     @commands.check(audio_playing)
-    @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto'])
+    @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto', 'skip2'])
     async def skipto(self, ctx, index: int):
         state = self.get_state(ctx.guild)
         if index is None:
