@@ -22,6 +22,11 @@ async def ping(ctx):
     await ctx.send('pong')
 
 
+@bot.command(pass_context=True, name='wink')
+async def wink(ctx):
+    await ctx.send('wonk')
+
+
 @bot.command(name='help')
 async def help(ctx):
     prefix = cfg["prefix"]

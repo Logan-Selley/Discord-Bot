@@ -18,7 +18,7 @@ from lyrics_extractor import Song_Lyrics
         Spotify/search                      !spot !sp                                   IN PROGRESS
         queue                               !q  !queue                                  COMPLETE
         lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TWEAKING SPOT INCOMPATIBLE
-        display all commands                !help                                       NEEDS TESTING (SHOULD WORK)
+        display all commands                !help                                       COMPLETE
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
         looping playlist/queue/song         !loop   [required argument]
@@ -29,7 +29,7 @@ from lyrics_extractor import Song_Lyrics
         forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
         move song position in queue         !move   [required argument] [required argument] COMPLETE
         clear queue                         !c  !clear                                  COMPLETE
-        remove duplicates                   !dupe   !d                                  NEEDS TESTING
+        remove duplicates                   !dupe   !d                                  COMPLETE
         volume                              !v  !volume     [required argument]         COMPLETE
         shuffle                             !shuff  !shuffle                            COMPLETE
         play: add to top of queue           !p/!play [required argument] [required argument]
@@ -40,6 +40,16 @@ from lyrics_extractor import Song_Lyrics
         
         testing notes
         Lyrics working, but bad request issue ???????
+        Change queue to show nicknames
+        bot feedback for volume
+        add queue text to shuffle
+        bot catch bad lyrics requests
+        catch spaces in usernames for 
+        lyrics key error
+        eliminate pause when reconnecting to youtube url
+        wink wonk command
+        
+        
 '''
 
 
@@ -255,7 +265,7 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         random.shuffle(state.playlist)
         await ctx.send("Shuffled!")
-        self._queue_text(state.playlist)
+        await ctx.send(self._queue_text(state.playlist))
 
     @commands.guild_only()
     @commands.check(in_voice)
@@ -333,7 +343,7 @@ class Music(commands.Cog):
         playlist = list(diction.values())
         state.playlist = playlist
         await ctx.send("Duplicates removed!")
-        self._queue_text(state.playlist)
+        await ctx.send(self._queue_text(state.playlist))
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -348,4 +358,4 @@ class Music(commands.Cog):
                 if song.requested_by.display_name == args[0]:
                     state.playlist.remove(song)
             await ctx.send("removed all songs requested by: " + args[0])
-            self._queue_text(state.playlist)
+            await ctx.send(self._queue_text(state.playlist))
