@@ -48,8 +48,8 @@ async def help(ctx):
     commands[prefix + "ping"] = "test the bot's responsiveness"
     commands[prefix + "prefix: pre"] = "display the current command prefix"
 
-    msg = discord.Embed(title="temp", description="Bot written by Logan Selley in Python 3"
-                                                  " using the discord.py library")
+    msg = discord.Embed(title="Very Sad Intern", description="Bot written by Logan Selley in Python 3"
+                                                             " using the discord.py library")
     for command, description in commands.items():
         msg.add_field(name=command, value=description, inline=False)
 
