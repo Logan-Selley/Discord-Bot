@@ -167,6 +167,7 @@ class Music(commands.Cog):
             )
 
     def _play_song(self, voice, state, song):
+        print("play song")
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
@@ -174,6 +175,7 @@ class Music(commands.Cog):
         )
 
         def after_playing(err):
+            print("after")
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
                 self._play_song(voice, state, next_song)
@@ -365,20 +367,35 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='seek')
     async def seek(self, ctx, timestamp):
-        secs = self._stamp_to_sec(ctx, timestamp)
+        secs = await self._stamp_to_sec(ctx, timestamp)
         state = self.get_state(ctx.guild)
         voice = ctx.voice_client
         duration = state.now_playing.duration
         print(duration)
+        print(secs)
         if secs > duration:
             await ctx.send("Timestamp is longer than the song dummy")
         else:
+            print("passed")
             source = discord.PCMVolumeTransformer(
                 discord.FFmpegPCMAudio(source=state.now_playing.stream_url,
                                        before_options='-ss ' + str(timestamp) +
                                                       ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
                 volume=state.volume
             )
+
+            voice.stop()
+
+            def after_playing(err):
+                print("after seek")
+                if len(state.playlist) > 0:
+                    next_song = state.playlist.pop(0)
+                    self._play_song(voice, state, next_song)
+                else:
+                    state.now_playing = None
+
+            voice.play(source, after=after_playing)
+            print("play seek")
 
     async def _stamp_to_sec(self, ctx, timestamp):
         state = self.get_state(ctx.guild)
