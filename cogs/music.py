@@ -40,14 +40,10 @@ from lyrics_extractor import Song_Lyrics
         
         testing notes
         Lyrics working, but bad request issue ???????
-        Change queue to show nicknames
-        bot feedback for volume
-        add queue text to shuffle
         bot catch bad lyrics requests
         catch spaces in usernames for 
         lyrics key error
         eliminate pause when reconnecting to youtube url
-        wink wonk command
         
         
 '''
@@ -204,6 +200,7 @@ class Music(commands.Cog):
         voice = ctx.voice_client
         state.volume = float(volume) / 100.0
         voice.source.volume = state.volume
+        await ctx.send("volume changed to: " + str(state.volume))
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -228,7 +225,7 @@ class Music(commands.Cog):
         if len(queue) > 0:
             message = [f"{len(queue)} songs in queue:"]
             message += [
-                f"  {index+1}. **{song.title}** (requested by **{song.requested_by.name}**)"
+                f"  {index+1}. **{song.title}** (requested by **{song.requested_by.display_name}**)"
                 for (index, song) in enumerate(queue)
             ]
             return "\n".join(message)
@@ -359,3 +356,22 @@ class Music(commands.Cog):
                     state.playlist.remove(song)
             await ctx.send("removed all songs requested by: " + args[0])
             await ctx.send(self._queue_text(state.playlist))
+
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name='seek')
+    async def seek(self, ctx, timestamp):
+        state = self.get_state(ctx.guild)
+        parts = timestamp.split(":")
+        if len(parts) < 1:
+            return await ctx.send("Invalid timestamp")
+
+        values = (1, 60, 60 * 60, 60 * 60 * 24)
+
+
+
+    def _goto_seconds(self, ctx, secs):
+        state = self.get_state(ctx.guild)
+        voice = ctx.voice_client
+        voice.source.duration
