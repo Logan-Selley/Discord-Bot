@@ -186,21 +186,24 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='volume', aliases=['v'])
-    async def volume(self, ctx, volume: int):
+    async def volume(self, ctx, *args: int):
         state = self.get_state(ctx.guild)
+        if len(args) == 0:
+            await ctx.send(str(state.volume))
+        else:
+            volume = args[0]
+            if volume < 0:
+                volume = 0
 
-        if volume < 0:
-            volume = 0
+            max_vol = self.config["max_volume"]
+            if max_vol > -1:
+                if volume > max_vol:
+                    volume = max_vol
 
-        max_vol = self.config["max_volume"]
-        if max_vol > -1:
-            if volume > max_vol:
-                volume = max_vol
-
-        voice = ctx.voice_client
-        state.volume = float(volume) / 100.0
-        voice.source.volume = state.volume
-        await ctx.send("volume changed to: " + str(state.volume))
+            voice = ctx.voice_client
+            state.volume = float(volume) / 100.0
+            voice.source.volume = state.volume
+            await ctx.send("volume changed to: " + str(state.volume))
 
     @commands.guild_only()
     @commands.check(audio_playing)
