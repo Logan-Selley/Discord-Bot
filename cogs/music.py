@@ -22,18 +22,15 @@ from lyrics_extractor import Song_Lyrics
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
         looping playlist/queue/song         !loop   [required argument]
-        remove song                         !re !remove [required argument]             IN PROGRESS
-        seek to certain point of song       !seek   [required argument]
+        remove song                         !re !remove [required argument]             COMPLETE
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
         skip/skipto                         !s  !skip   [optional argument]             COMPLETE
-        forward/rewind                      !f/!rw  !forward/!rewind    [required argument]
+        seek                                !seek [required argument]                   COMPLETE
         move song position in queue         !move   [required argument] [required argument] COMPLETE
         clear queue                         !c  !clear                                  COMPLETE
         remove duplicates                   !dupe   !d                                  COMPLETE
         volume                              !v  !volume     [required argument]         COMPLETE
         shuffle                             !shuff  !shuffle                            COMPLETE
-        play: add to top of queue           !p/!play [required argument] [required argument]
-        play: add to top of queue and skip current  !p/!play [required argument] [required argument]
         removeusersongs                     !rus remove songs requested by given user (works with nicknames)        COMPLETE
         
         
@@ -402,6 +399,19 @@ class Music(commands.Cog):
             state.playlist.insert(0, song)
             voice.stop()
 
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name='fastforward', aliases=["ff"])
+    async def ff(self, ctx, timestamp):
+        # get current timestamp
+
+
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name='rewind', aliases=["rw"])
+    async def rw(self, ctx, timestamp):
 
 
     async def _stamp_to_sec(self, ctx, timestamp):

@@ -48,6 +48,7 @@ async def help(ctx):
     commands[prefix + "lyrics: ly"] = "search and show the lyrics of the current song or the given search query"
     commands[prefix + "duplicates: dupe, d"] = "remove  duplicate items from music queue"
     commands[prefix + "removeusersongs: rus"] = "removes all songs requested by the given user, works with nicknames"
+    commands[prefix + "seek"] = "start the currently playing audio at the given timestamp"
     # GENERAL
     commands[prefix + "help"] = "You just called this command, congrats"
     commands[prefix + "ping"] = "test the bot's responsiveness"
