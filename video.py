@@ -25,7 +25,7 @@ class Video:
                 "thumbnail"] if "thumbnail" in video else None
             self.requested_by = requested_by
             self.origin = "ytdl"
-            self.source = None
+            self.duration = video['duration']
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:

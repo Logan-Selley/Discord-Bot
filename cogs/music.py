@@ -186,10 +186,10 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='volume', aliases=['v'])
-    async def volume(self, ctx, *args: int):
+    async def volume(self, ctx, *args: float):
         state = self.get_state(ctx.guild)
         if len(args) == 0:
-            await ctx.send(str(state.volume))
+            await ctx.send(str(state.volume * 100))
         else:
             volume = args[0]
             if volume < 0:
@@ -203,7 +203,7 @@ class Music(commands.Cog):
             voice = ctx.voice_client
             state.volume = float(volume) / 100.0
             voice.source.volume = state.volume
-            await ctx.send("volume changed to: " + str(state.volume))
+            await ctx.send("volume changed to: " + str(state.volume * 100))
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -365,16 +365,41 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='seek')
     async def seek(self, ctx, timestamp):
+        secs = self._stamp_to_sec(ctx, timestamp)
+        state = self.get_state(ctx.guild)
+        voice = ctx.voice_client
+        duration = state.now_playing.duration
+        print(duration)
+        if secs > duration:
+            await ctx.send("Timestamp is longer than the song dummy")
+        else:
+            source = discord.PCMVolumeTransformer(
+                discord.FFmpegPCMAudio(source=state.now_playing.stream_url,
+                                       before_options='-ss ' + str(timestamp) +
+                                                      ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
+                volume=state.volume
+            )
+
+    async def _stamp_to_sec(self, ctx, timestamp):
         state = self.get_state(ctx.guild)
         parts = timestamp.split(":")
         if len(parts) < 1:
-            return await ctx.send("Invalid timestamp")
+            await ctx.send("Invalid timestamp")
+        else:
 
-        values = (1, 60, 60 * 60, 60 * 60 * 24)
+            values = (1, 60, 60 * 60, 60 * 60 * 24)
 
+            secs = 0
+            for i in range(len(parts)):
+                try:
+                    v = int(parts[i])
+                except:
+                    continue
 
+                j = len(parts) - i - 1
+                if j >= len(values):  # If I don't have a conversion from this to seconds
+                    continue
 
-    def _goto_seconds(self, ctx, secs):
-        state = self.get_state(ctx.guild)
-        voice = ctx.voice_client
-        voice.source.duration
+                secs += v * values[j]
+
+            return secs
