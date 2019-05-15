@@ -156,7 +156,12 @@ class Music(commands.Cog):
             )
             await ctx.message.delete()
             if not voice.source:
-                self._play_song(voice, state, video)
+                source = discord.PCMVolumeTransformer(
+                    discord.FFmpegPCMAudio(source=video.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                                                  '-reconnect_delay_max 5'),
+                    volume=state.volume
+                )
+                self._play_song(voice, state, video, source)
                 state.playlist.pop(0)
                 message = await ctx.send("Now Playing:", embed=video.get_embed())
                 logging.info(f"Now Playing '{video.title}'")
@@ -166,23 +171,32 @@ class Music(commands.Cog):
                 "I'm not in a voice channel yet!"
             )
 
-    def _play_song(self, voice, state, song):
+    def _play_song(self, voice, state, song, source):
         print("play song")
         state.now_playing = song
-        source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                                          '-reconnect_delay_max 5'), volume=state.volume
-        )
+        if source is None:
+            if song.seek is not None:
+                source = song.seek
+            else:
+                source = self._get_source(song, state)
 
         def after_playing(err):
             print("after")
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
-                self._play_song(voice, state, next_song)
+                self._play_song(voice, state, next_song, None)
             else:
                 state.now_playing = None
 
         voice.play(source, after=after_playing)
+
+    def _get_source(self, song, state):
+        source = discord.PCMVolumeTransformer(
+            discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                                           '-reconnect_delay_max 5'),
+            volume=state.volume
+        )
+        return source
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -383,19 +397,12 @@ class Music(commands.Cog):
                                                       ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
                 volume=state.volume
             )
-
+            song = state.now_playing
+            song.seek = source
+            state.playlist.insert(0, song)
             voice.stop()
 
-            def after_playing(err):
-                print("after seek")
-                if len(state.playlist) > 0:
-                    next_song = state.playlist.pop(0)
-                    self._play_song(voice, state, next_song)
-                else:
-                    state.now_playing = None
 
-            voice.play(source, after=after_playing)
-            print("play seek")
 
     async def _stamp_to_sec(self, ctx, timestamp):
         state = self.get_state(ctx.guild)
