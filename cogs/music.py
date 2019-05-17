@@ -439,7 +439,7 @@ class Music(commands.Cog):
                 secs += v * values[j]
             is_digit = True
             for string in parts:
-                if not string.isDigit():
+                if not str.isdigit(string):
                     is_digit = False
             if is_digit:
                 return secs
