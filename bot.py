@@ -53,6 +53,7 @@ async def help(ctx):
     commands[prefix + "help"] = "You just called this command, congrats"
     commands[prefix + "ping"] = "test the bot's responsiveness"
     commands[prefix + "prefix: pre"] = "display the current command prefix"
+    commands[prefix + "loop: looping"] = "loop song/playlist by giving arg 'song' or 'queue', turn off with 'off'"
 
     msg = discord.Embed(title="Very Sad Intern", description="Bot written by Logan Selley in Python 3"
                                                              " using the discord.py library")
