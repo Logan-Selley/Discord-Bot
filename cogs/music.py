@@ -467,7 +467,7 @@ class Music(commands.Cog):
         elif args[0] == "song" or args[0] == "s":
             self.looping = "song"
             await ctx.send("now looping this song")
-        elif args[0] == "none" or args[0] == "stop" or args[0] == "off"
+        elif args[0] == "none" or args[0] == "stop" or args[0] == "off":
             self.looping = None
             await ctx.send("no longer looping")
         else:
