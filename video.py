@@ -27,7 +27,6 @@ class Video:
             self.origin = "ytdl"
             self.duration = video['duration']
             self.seek = None
-            self.loop = None
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:

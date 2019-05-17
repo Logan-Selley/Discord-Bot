@@ -21,7 +21,7 @@ from lyrics_extractor import Song_Lyrics
         display all commands                !help                                       COMPLETE
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
-        looping playlist/queue/song         !loop   [required argument]
+        looping playlist/queue/song         !loop   [required argument]                 COMPLETE
         remove song                         !re !remove [required argument]             COMPLETE
         pause/resume                        !pa/!r  !pause/!resume                      COMPLETE
         skip/skipto                         !s  !skip   [optional argument]             COMPLETE
@@ -40,7 +40,7 @@ from lyrics_extractor import Song_Lyrics
         bot catch bad lyrics requests
         catch spaces in usernames for 
         lyrics key error
-        eliminate pause when reconnecting to youtube url
+        Restructure help command to take less space and expand instructions for given command
         
         
 '''
