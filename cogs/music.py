@@ -384,35 +384,37 @@ class Music(commands.Cog):
         duration = state.now_playing.duration
         print(duration)
         print(secs)
-        if secs > duration:
-            await ctx.send("Timestamp is longer than the song dummy")
+        if secs is None:
+            await ctx.send("invalid timestamp")
         else:
-            print("passed")
-            source = discord.PCMVolumeTransformer(
-                discord.FFmpegPCMAudio(source=state.now_playing.stream_url,
-                                       before_options='-ss ' + str(timestamp) +
-                                                      ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
-                volume=state.volume
-            )
-            song = state.now_playing
-            song.seek = source
-            state.playlist.insert(0, song)
-            voice.stop()
+            if secs > duration:
+                await ctx.send("Timestamp is longer than the song dummy")
+            else:
+                print("passed")
+                source = discord.PCMVolumeTransformer(
+                    discord.FFmpegPCMAudio(source=state.now_playing.stream_url,
+                                           before_options='-ss ' + str(timestamp) +
+                                                          ' -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
+                    volume=state.volume
+                )
+                song = state.now_playing
+                song.seek = source
+                state.playlist.insert(0, song)
+                voice.stop()
 
     @commands.guild_only()
     @commands.check(audio_playing)
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='fastforward', aliases=["ff"])
     async def ff(self, ctx, timestamp):
-        # get current timestamp
-
+        print("ff")
 
     @commands.guild_only()
     @commands.check(audio_playing)
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='rewind', aliases=["rw"])
     async def rw(self, ctx, timestamp):
-
+        print("rw")
 
     async def _stamp_to_sec(self, ctx, timestamp):
         state = self.get_state(ctx.guild)
@@ -436,4 +438,7 @@ class Music(commands.Cog):
 
                 secs += v * values[j]
 
-            return secs
+            if parts[0].isdigit():
+                return secs
+            else:
+                return None
