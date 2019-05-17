@@ -453,7 +453,7 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.check(audio_playing)
     @commands.check(in_voice)
-    @commands.command(pass_context = True, name='loop', aliases=['l'])
+    @commands.command(pass_context = True, name='loop', aliases=['looping'])
     async def loop(self, ctx, *args):
         state = self.get_state(ctx.guild)
         if len(args) == 0:
@@ -466,5 +466,9 @@ class Music(commands.Cog):
             await ctx.send("now looping this queue")
         elif args[0] == "song" or args[0] == "s":
             self.looping = "song"
+            await ctx.send("now looping this song")
+        elif args[0] == "none" or args[0] == "stop" or args[0] == "off"
+            self.looping = None
+            await ctx.send("no longer looping")
         else:
             await ctx.send("invalid argument")
