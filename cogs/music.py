@@ -88,6 +88,7 @@ class Music(commands.Cog):
         self.bot = bot
         self.config = config[__name__.split(".")[-1]]
         self.states = {}
+        self.looping = None
 
     def get_state(self, guild):
         # Gets or creates the state for the given guild
@@ -169,7 +170,6 @@ class Music(commands.Cog):
             )
 
     def _play_song(self, voice, state, song, source):
-        print("play song")
         state.now_playing = song
         if source is None:
             if song.seek is not None:
@@ -178,7 +178,11 @@ class Music(commands.Cog):
                 source = self._get_source(song, state)
 
         def after_playing(err):
-            print("after")
+            if self.looping == "song":
+                state.playlist.insert(0, song)
+            elif self.looping == "queue":
+                state.playlist.append(song)
+
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
                 self._play_song(voice, state, next_song, None)
@@ -445,3 +449,22 @@ class Music(commands.Cog):
                 return secs
             else:
                 return None
+
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    @commands.check(in_voice)
+    @commands.command(pass_context = True, name='loop', aliases=['l'])
+    async def loop(self, ctx, *args):
+        state = self.get_state(ctx.guild)
+        if len(args) == 0:
+            if self.looping is None:
+                await ctx.send("not currently looping")
+            else:
+                await ctx.send("currently looping: " + str(self.looping))
+        elif args[0] == "queue" or args[0] == "q":
+            self.looping = "queue"
+            await ctx.send("now looping this queue")
+        elif args[0] == "song" or args[0] == "s":
+            self.looping = "song"
+        else:
+            await ctx.send("invalid argument")
