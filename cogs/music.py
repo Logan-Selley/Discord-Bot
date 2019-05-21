@@ -5,7 +5,7 @@ import asyncio
 import spotipy
 import logging
 from discord.ext import commands
-from video import Video
+from video import Video, Playlist, Spotify
 import config
 from lyrics_extractor import Song_Lyrics
 
@@ -41,6 +41,7 @@ from lyrics_extractor import Song_Lyrics
         catch spaces in usernames for 
         lyrics key error
         Restructure help command to take less space and expand instructions for given command
+        Move looping to state
         
         
 '''
@@ -472,3 +473,49 @@ class Music(commands.Cog):
             await ctx.send("no longer looping")
         else:
             await ctx.send("invalid argument")
+
+    @commands.guild_only()
+    @commands.check(in_voice)
+    @commands.command(pass_context = True, name='playlist', aliases=['pl'])
+    async def playlist(self, ctx, *args):
+        state = self.get_state(ctx.guild)
+        if len(args) == 0:
+            await ctx.send("No url given")
+        elif len(args) > 1 or not isinstance(args[0], str):
+            await ctx.send("invalid url")
+        else:
+            voice = ctx.voice_client
+            url = args[0]
+            if voice and voice.channel:
+                try:
+                    playlist = Playlist(url, ctx.author)
+                except youtube_dl.DownloadError as e:
+                    logging.warning(f"Error downloading playlist: {e}")
+                    await ctx.send(
+                        "There was an error donwloading your playlist"
+                    )
+                    return
+                length = len(playlist)
+                for video in playlist:
+                    state.playlist.append(video)
+                message = ("Added playlist queue," + str(length) + " songs:")
+                await ctx.send(message, embed=playlist[0].get_embed)
+                await ctx.message.delete()
+                if not voice.source:
+                    video = playlist[0]
+                    source = discord.PCMVolumeTransformer(
+                        discord.FFmpegPCMAudio(source=video.stream_url,
+                                               before_options='-reconnect 1 -reconnect_streamed 1 '
+                                                              '-reconnect_delay_max 5'),
+                        volume=state.volume
+                    )
+                    self._play_song(voice, state, video, source)
+                    state.playlist.pop(0)
+                    message = await ctx.send("Now Playing:", embed=video.get_embed())
+                    logging.info(f"Now Playing '{video.title}'")
+            else:
+                await ctx.send("I'm not in a voice channel yet!")
+                raise commands.CommandError(
+                    "I'm not in a voice channel yet!"
+                )
+
