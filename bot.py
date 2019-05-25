@@ -71,8 +71,9 @@ COGS = ['cogs.music', 'cogs.ErrorHandler']
 
 
 def add_cogs(bot):
-    print("cogs")
+    print("cogs:")
     for cog in COGS:
+        print(cog)
         bot.load_extension(cog)
 
 

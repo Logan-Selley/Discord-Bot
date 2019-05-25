@@ -1,6 +1,7 @@
 import youtube_dl as ytdl
 import discord
 
+
 YTDL_OPTS = {
     "default_search": "auto",
     "format": "bestaudio/best",
@@ -59,7 +60,7 @@ class Playlist:
             print("ERROR: empty playlist")
         self.playlist = []
         for video in arr:
-            url = video["webpage_url"]
+            url = video["url"]
             arr.append(Video(url, requested_by))
 
     def _get_info_playlist(self, url):

@@ -8,6 +8,8 @@ from discord.ext import commands
 from video import Video, Playlist, Spotify
 import config
 from lyrics_extractor import Song_Lyrics
+from urlvalidator import validate_url, validate_email, ValidationError
+from spotipy.oauth2 import SpotifyClientCredentials
 
 
 '''
@@ -135,18 +137,45 @@ class Music(commands.Cog):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
         url = ""
+        type = None
         if len(args) > 1:
             for term in args:
                 url += term + " "
+                type = "search"
         else:
             url = args[0]
-        if voice and voice.channel:
             try:
-                video = Video(url, ctx.author)
+                validate_url(url)
+                type = "url"
+            except ValidationError:
+                type = "search"
+        if voice and voice.channel:
+            credentials = SpotifyClientCredentials(client_id=cfg["spotify_client"], client_secret=cfg["spotify_secret"])
+            spot = spotipy.Spotify(client_credentials_manager=credentials)
+            result = None
+            if type == "url":
+                if "youtube" in url:
+                    result = url
+                elif "spotify" in url:
+                    try:
+                        track = spot.track(url)
+                        result = track['artists'][0]['name'] + " " + track['name']
+                    except:
+                        await ctx.send("invalid url")
+            elif type == "search":
+                try:
+                    search = spot.search(q=url, limit=1, type='track')
+                    track = search['items'][0]
+                    result = track['artists'][0]['name'] + " " + track['name']
+                except:
+                    result = url
+            try:
+                print(result)
+                video = Video(result, ctx.author)
             except youtube_dl.DownloadError as e:
                 logging.warning(f"Error downloading video: {e}")
                 await ctx.send(
-                    "There was an error donwloading your video"
+                    "There was an error downloading your video"
                 )
                 return
             state.playlist.append(video)
