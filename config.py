@@ -9,6 +9,8 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 "max_volume"=250 # Max audio volume. Set to -1 for unlimited.
 "search_key"=""
 "search_id"=""
+\"spotify_client\"=\"\"
+\"spotify_secret\"=\"\"
 """
 
 

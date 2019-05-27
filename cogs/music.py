@@ -150,9 +150,10 @@ class Music(commands.Cog):
             except ValidationError:
                 type = "search"
         if voice and voice.channel:
-            credentials = SpotifyClientCredentials(client_id=cfg["spotify_client"], client_secret=cfg["spotify_secret"])
+            credentials = SpotifyClientCredentials(client_id="2195f630db34453bbce042045eb281c0", client_secret="3c1334b1750541789b2999e1569a115c")
             spot = spotipy.Spotify(client_credentials_manager=credentials)
             result = None
+            print(type)
             if type == "url":
                 if "youtube" in url:
                     result = url
@@ -165,9 +166,13 @@ class Music(commands.Cog):
             elif type == "search":
                 try:
                     search = spot.search(q=url, limit=1, type='track')
+                    print(search)
                     track = search['items'][0]
+                    print(track)
                     result = track['artists'][0]['name'] + " " + track['name']
+                    print(result)
                 except:
+                    print("search fail")
                     result = url
             try:
                 print(result)
