@@ -16,10 +16,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
     Commands to add:
         change prefix                        MOVED TO CONFIG
         prefix  (display)                   !pre                                        COMPLETE
-        youtube/search                      !p  !play [required argument]               MOSTLY WORKING
-        Spotify/search                      !spot !sp                                   IN PROGRESS
+        youtube/search                      !p  !play [required argument]               COMPLETE?
         queue                               !q  !queue                                  COMPLETE
-        lyrics of now playing/given song    !ly !lyrics [optional argument]             NEEDS TWEAKING SPOT INCOMPATIBLE
+        lyrics of now playing/given song    !ly !lyrics [optional argument]             BROKE AF
         display all commands                !help                                       COMPLETE
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
@@ -34,6 +33,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         volume                              !v  !volume     [required argument]         COMPLETE
         shuffle                             !shuff  !shuffle                            COMPLETE
         removeusersongs                     !rus remove songs requested by given user (works with nicknames)        COMPLETE
+        playlist                            !pl add playlist (yt or spotify) to queue   IN PROGRESS
         
         
         
@@ -43,7 +43,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
         catch spaces in usernames for 
         lyrics key error
         Restructure help command to take less space and expand instructions for given command
-        Move looping to state
+        Check queue message length
+        restructure play command to sequentially call play instead of all at once
+        add spotify api handling for playlists
         
         
 '''
@@ -136,6 +138,7 @@ class Music(commands.Cog):
                 state.now_playing = None
                 logging.info("left voice")
         else:
+            await ctx.send("I'm not in a voice channel")
             raise commands.CommandError("Not in a voice channel")
 
     @commands.check(in_voice)
@@ -303,6 +306,7 @@ class Music(commands.Cog):
         voice = ctx.voice_client
         voice.stop()
         logging.info("skipped audio")
+        await ctx.send("skipped!")
 
     @commands.guild_only()
     @commands.check(audio_playing)
