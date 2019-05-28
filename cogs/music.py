@@ -126,11 +126,15 @@ class Music(commands.Cog):
     async def leave(self, ctx):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
-        if voice and voice.channel:
+        if voice is not None and voice.is_connected():
             await voice.disconnect()
-            state.playlist = []
-            state.now_playing = None
-            logging.info("left voice")
+            if voice.is_connected():
+                logging.warning("FAILED TO LEAVE")
+                await ctx.send("something went wrong...")
+            else:
+                state.playlist = []
+                state.now_playing = None
+                logging.info("left voice")
         else:
             raise commands.CommandError("Not in a voice channel")
 
@@ -138,6 +142,9 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, *args):
+        if len(args) == 0:
+            await ctx.send("you're missing parameters!")
+            raise commands.CommandError("Missing arguments")
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
         url = ""
@@ -173,15 +180,12 @@ class Music(commands.Cog):
             elif type == "search":
                 try:
                     search = spot.search(q=url, limit=1, type='track')
-                    print("search:" + str(search))
                     track = search['tracks']['items'][0]
-                    print("track: " + str(track))
                     result = track['artists'][0]['name'] + " " + track['name']
                 except:
-                    print("search fail")
+                    logging.info("search fail")
                     result = url
             try:
-                print(result)
                 video = Video(result, ctx.author)
             except youtube_dl.DownloadError as e:
                 logging.warning(f"Error downloading video: {e}")
@@ -190,11 +194,12 @@ class Music(commands.Cog):
                 )
                 return
             state.playlist.append(video)
+            logging.info(result + " added to queue")
             message = await ctx.send(
                 "Added to queue:", embed=video.get_embed()
             )
             await ctx.message.delete()
-            if not voice.is_playing:
+            if not voice.is_playing():
                 logging.info("cold start")
                 self._play_song(voice, state, video, None)
                 state.playlist.pop(0)
@@ -264,7 +269,7 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='pause', aliases=['pa'])
     async def pause(self, ctx):
-        if ctx.voice_client.is_playing:
+        if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
 
     @commands.command(pass_context=True, name='resume', aliases=['re'])
