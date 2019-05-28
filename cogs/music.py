@@ -59,8 +59,7 @@ class GuildState:
 
 async def audio_playing(ctx):
     client = ctx.voice_client
-    if client and client.channel and client.source:
-        # await ctx.send("audio playing")
+    if client.is_playing:
         return True
     else:
         await ctx.send("Not currently playing audio")
@@ -108,15 +107,19 @@ class Music(commands.Cog):
             channel = author.voice.channel
         except:
             await ctx.send("You are not connected to a voice channel")
+            logging.info("author not in voice")
             return
         if author.voice.afk:
             await ctx.send("That's the afk channel fam I'm not going in there")
+            logging.info("afk channel attempt")
             return
         voice = ctx.voice_client
         if voice and voice.is_connected():
             await voice.move_to(channel)
+            logging.info("moved channels")
         else:
             await channel.connect()
+            logging.info("joined voice channel")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='leave', aliases=['l'])
@@ -127,6 +130,7 @@ class Music(commands.Cog):
             await voice.disconnect()
             state.playlist = []
             state.now_playing = None
+            logging.info("left voice")
         else:
             raise commands.CommandError("Not in a voice channel")
 
@@ -149,16 +153,19 @@ class Music(commands.Cog):
                 type = "url"
             except ValidationError:
                 type = "search"
-        if voice and voice.channel:
-            credentials = SpotifyClientCredentials(client_id="2195f630db34453bbce042045eb281c0", client_secret="3c1334b1750541789b2999e1569a115c")
+        if voice.is_connected():
+            credentials = SpotifyClientCredentials(client_id=self.config["spotify_client"],
+                                                   client_secret=self.config["spotify_secret"])
             spot = spotipy.Spotify(client_credentials_manager=credentials)
             result = None
             print(type)
             if type == "url":
                 if "youtube" in url:
+                    print("youtube")
                     result = url
                 elif "spotify" in url:
                     try:
+                        print("spotify")
                         track = spot.track(url)
                         result = track['artists'][0]['name'] + " " + track['name']
                     except:
@@ -166,11 +173,10 @@ class Music(commands.Cog):
             elif type == "search":
                 try:
                     search = spot.search(q=url, limit=1, type='track')
-                    print(search)
-                    track = search['items'][0]
-                    print(track)
+                    print("search:" + str(search))
+                    track = search['tracks']['items'][0]
+                    print("track: " + str(track))
                     result = track['artists'][0]['name'] + " " + track['name']
-                    print(result)
                 except:
                     print("search fail")
                     result = url
@@ -188,20 +194,15 @@ class Music(commands.Cog):
                 "Added to queue:", embed=video.get_embed()
             )
             await ctx.message.delete()
-            if not voice.source:
-                source = discord.PCMVolumeTransformer(
-                    discord.FFmpegPCMAudio(source=video.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                                                  '-reconnect_delay_max 5'),
-                    volume=state.volume
-                )
-                self._play_song(voice, state, video, source)
+            if not voice.is_playing:
+                logging.info("cold start")
+                self._play_song(voice, state, video, None)
                 state.playlist.pop(0)
                 message = await ctx.send("Now Playing:", embed=video.get_embed())
-                logging.info(f"Now Playing '{video.title}'")
         else:
             await ctx.send("I'm not in a voice channel yet!")
             raise commands.CommandError(
-                "I'm not in a voice channel yet!"
+                "Not in a voice channel"
             )
 
     def _play_song(self, voice, state, song, source):
@@ -211,6 +212,7 @@ class Music(commands.Cog):
                 source = song.seek
             else:
                 source = self._get_source(song, state)
+        logging.info(f"Now Playing '{song.title}'")
 
         def after_playing(err):
             if self.looping == "song":
@@ -295,6 +297,7 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         voice = ctx.voice_client
         voice.stop()
+        logging.info("skipped audio")
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -521,14 +524,7 @@ class Music(commands.Cog):
             voice = ctx.voice_client
             url = args[0]
             if voice and voice.channel:
-                try:
-                    playlist = Playlist(url, ctx.author)
-                except youtube_dl.DownloadError as e:
-                    logging.warning(f"Error downloading playlist: {e}")
-                    await ctx.send(
-                        "There was an error donwloading your playlist"
-                    )
-                    return
+                playlist = Playlist(url, ctx.author)
                 length = len(playlist)
                 for video in playlist:
                     state.playlist.append(video)
