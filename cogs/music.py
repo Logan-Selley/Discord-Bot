@@ -2,10 +2,10 @@ import discord
 import random
 import youtube_dl
 import asyncio
-import spotipy
+import spotipy_edit
 import logging
 from discord.ext import commands
-from video import Video, Playlist, Spotify
+from video import Video, Playlist
 import config
 from lyrics_extractor import Song_Lyrics
 from urlvalidator import validate_url, validate_email, ValidationError
@@ -46,6 +46,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         Check queue message length
         restructure play command to sequentially call play instead of all at once
         add spotify api handling for playlists
+        move looping to state
         
         
 '''
@@ -93,6 +94,9 @@ class Music(commands.Cog):
         self.config = config[__name__.split(".")[-1]]
         self.states = {}
         self.looping = None
+        credentials = SpotifyClientCredentials(client_id=self.config["spotify_client"],
+                                                   client_secret=self.config["spotify_secret"])
+        self.spot = spotipy_edit.Spotify(client_credentials_manager=credentials)
 
     def get_state(self, guild):
         # Gets or creates the state for the given guild
@@ -164,9 +168,6 @@ class Music(commands.Cog):
             except ValidationError:
                 type = "search"
         if voice.is_connected():
-            credentials = SpotifyClientCredentials(client_id=self.config["spotify_client"],
-                                                   client_secret=self.config["spotify_secret"])
-            spot = spotipy.Spotify(client_credentials_manager=credentials)
             result = None
             print(type)
             if type == "url":
@@ -176,13 +177,13 @@ class Music(commands.Cog):
                 elif "spotify" in url:
                     try:
                         print("spotify")
-                        track = spot.track(url)
+                        track = self.spot.track(url)
                         result = track['artists'][0]['name'] + " " + track['name']
                     except:
                         await ctx.send("invalid url")
             elif type == "search":
                 try:
-                    search = spot.search(q=url, limit=1, type='track')
+                    search = self.spot.search(q=url, limit=1, type='track')
                     track = search['tracks']['items'][0]
                     result = track['artists'][0]['name'] + " " + track['name']
                 except:
@@ -522,39 +523,44 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.check(in_voice)
-    @commands.command(pass_context = True, name='playlist', aliases=['pl'])
+    @commands.command(pass_context=True, name='playlist', aliases=['pl'])
     async def playlist(self, ctx, *args):
         state = self.get_state(ctx.guild)
+        queries = []
         if len(args) == 0:
             await ctx.send("No url given")
-        elif len(args) > 1 or not isinstance(args[0], str):
-            await ctx.send("invalid url")
         else:
-            voice = ctx.voice_client
             url = args[0]
-            if voice and voice.channel:
-                playlist = Playlist(url, ctx.author)
-                length = len(playlist)
-                for video in playlist:
-                    state.playlist.append(video)
-                message = ("Added playlist queue," + str(length) + " songs:")
-                await ctx.send(message, embed=playlist[0].get_embed)
-                await ctx.message.delete()
-                if not voice.source:
-                    video = playlist[0]
-                    source = discord.PCMVolumeTransformer(
-                        discord.FFmpegPCMAudio(source=video.stream_url,
-                                               before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                              '-reconnect_delay_max 5'),
-                        volume=state.volume
-                    )
-                    self._play_song(voice, state, video, source)
-                    state.playlist.pop(0)
-                    message = await ctx.send("Now Playing:", embed=video.get_embed())
-                    logging.info(f"Now Playing '{video.title}'")
-            else:
-                await ctx.send("I'm not in a voice channel yet!")
-                raise commands.CommandError(
-                    "I'm not in a voice channel yet!"
-                )
+            try:
+                validate_url(url)
+            except ValidationError:
+                await ctx.send("invalid url")
+                return
+            if "spotify" in url:
+                print("spotify")
+                try:
+                    pid = url.split("playlist/", 1)[1]
+                    pid = pid.split("?si=", 1)[0]
+                    print(pid)
+                except:
+                    await ctx.send("Error handling url, make sure it's the right type")
+                    return
+                try:
+                    result = self.spot.playlist_tracks(playlist_id=pid, fields="items(track(name, artists))")
+                except:
+                    await ctx.send("There was an error processing your playlist")
+                    return
+                for track in result["items"]:
+                    print(track)
+                    name = track.get("name")
+                    print("name: " + name)
+
+                    queries.append(name)
+            elif "youtube" in url:
+                print("yt")
+
+            await ctx.send("adding playlist to queue")
+            print(queries)
+            for query in queries:
+                await self.play(ctx, query)
 
