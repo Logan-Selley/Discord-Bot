@@ -149,6 +149,9 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, *args):
+        await self._play(ctx, args)
+
+    async def _play(self, ctx, args):
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
@@ -208,11 +211,6 @@ class Music(commands.Cog):
                 self._play_song(voice, state, video, None)
                 state.playlist.pop(0)
                 message = await ctx.send("Now Playing:", embed=video.get_embed())
-        else:
-            await ctx.send("I'm not in a voice channel yet!")
-            raise commands.CommandError(
-                "Not in a voice channel"
-            )
 
     def _play_song(self, voice, state, song, source):
         state.now_playing = song
@@ -560,7 +558,7 @@ class Music(commands.Cog):
             await ctx.send("adding playlist to queue")
             print(queries)
             for query in queries:
-                await self.play(ctx, query)
+                await self._play(ctx, query)
 
 
 '''      
