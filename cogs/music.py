@@ -58,6 +58,7 @@ class GuildState:
         self.volume = 1.0
         self.playlist = []
         self.now_playing = None
+        self.looping = None
 
 
 async def audio_playing(ctx):
@@ -93,7 +94,6 @@ class Music(commands.Cog):
         self.bot = bot
         self.config = config[__name__.split(".")[-1]]
         self.states = {}
-        self.looping = None
         credentials = SpotifyClientCredentials(client_id=self.config["spotify_client"],
                                                    client_secret=self.config["spotify_secret"])
         self.spot = spotipy_edit.Spotify(client_credentials_manager=credentials)
@@ -224,9 +224,9 @@ class Music(commands.Cog):
         logging.info(f"Now Playing '{song.title}'")
 
         def after_playing(err):
-            if self.looping == "song":
+            if state.looping == "song":
                 state.playlist.insert(0, song)
-            elif self.looping == "queue":
+            elif state.looping == "queue":
                 state.playlist.append(song)
 
             if len(state.playlist) > 0:
@@ -505,18 +505,18 @@ class Music(commands.Cog):
     async def loop(self, ctx, *args):
         state = self.get_state(ctx.guild)
         if len(args) == 0:
-            if self.looping is None:
+            if state.looping is None:
                 await ctx.send("not currently looping")
             else:
                 await ctx.send("currently looping: " + str(self.looping))
         elif args[0] == "queue" or args[0] == "q":
-            self.looping = "queue"
+            state.looping = "queue"
             await ctx.send("now looping this queue")
         elif args[0] == "song" or args[0] == "s":
-            self.looping = "song"
+            state.looping = "song"
             await ctx.send("now looping this song")
         elif args[0] == "none" or args[0] == "stop" or args[0] == "off":
-            self.looping = None
+            state.looping = None
             await ctx.send("no longer looping")
         else:
             await ctx.send("invalid argument")
@@ -551,11 +551,9 @@ class Music(commands.Cog):
                     await ctx.send("There was an error processing your playlist")
                     return
                 for track in result["items"]:
-                    print(track)
-                    name = track.get("name")
-                    print("name: " + name)
-
-                    queries.append(name)
+                    query = track['track']['artists'][0]['name'] + " " + track['track']['name']
+                    print(query)
+                    queries.append(query)
             elif "youtube" in url:
                 print("yt")
 
@@ -563,4 +561,25 @@ class Music(commands.Cog):
             print(queries)
             for query in queries:
                 await self.play(ctx, query)
+
+
+'''      
+{'track': 
+     {'artists': 
+          [{'external_urls': 
+                {'spotify': 'https://open.spotify.com/artist/7jVv8c5Fj3E9VhNjxT4snq'}, 
+            'href': 'https://api.s[38;2;255;107;104mIgnoring exception in cpommand playlist:mtify.com/v1/artists/7jVv8c5Fj3E9VhNjxT4snq', 
+            'id': '7jVv8c5Fj3E9VhNjxT4snq', 
+            'name': 'Lil Nas X', 
+            'type': 'artist', 
+            'uri': 'spotify:artist:7jVv8c5Fj3E9VhNjxT4snq'}, 
+           {'external_urls': 
+                {'spotify': 'https://open.spotify.com/artist/60rpJ9SgigSd16DOAG7GSa'}, 
+            'href': 'https://api.spotify.com/v1/artists/60rpJ9SgigSd16DOAG7GSa', 
+            'id': '60rpJ9SgigSd16DOAG7GSa', 
+            'name': 'Billy Ray Cyrus', 
+            'type': 'artist', 
+            'uri': 'spotify:artist:60rpJ9SgigSd16DOAG7GSa'}], 
+      'name': 'Old Town Road - Remix'}}
+'''
 
