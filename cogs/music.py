@@ -45,6 +45,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         Restructure help command to take less space and expand instructions for given command
         Check queue message length
         refactor play/playlist input cleaning
+        refactor url check
         
 '''
 
@@ -281,22 +282,39 @@ class Music(commands.Cog):
         ctx.voice_client.resume()
 
     @commands.guild_only()
-    @commands.check(audio_playing)
+    # @commands.check(audio_playing)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
         state = self.get_state(ctx.guild)
-        await ctx.send(self._queue_text(state.playlist))
+        await self._send_queue(ctx, state.playlist)
+
+    async def _send_queue(self, ctx, queue):
+        messages = self._queue_text(queue)
+        for string in messages:
+            await ctx.send(string)
 
     def _queue_text(self, queue):
+        messages = []
         if len(queue) > 0:
-            message = [f"{len(queue)} songs in queue:"]
-            message += [
-                f"  {index+1}. **{song.title}** (requested by **{song.requested_by.display_name}**)"
-                for (index, song) in enumerate(queue)
-            ]
-            return "\n".join(message)
+            start = [f"{len(queue)} songs in queue:"]
+            message = start
+            for (index, song) in enumerate(queue):
+                add = f" \n {index+1}. **{song.title}** (requested by **{song.requested_by.display_name}**)"
+                print(len(str(add)))
+                print(len(str(message)))
+                print(len(str(add)) + len(str(message)))
+                if (len(str(add)) + len(str(message))) >= 2000:
+                    messages.append(message)
+                    message = ""
+                    message += add
+                    index += 1
+                else:
+                    message += add
+            messages.append(message)
+            return messages
         else:
-            return "The queue is empty"
+            messages.append("the queue is empty")
+            return messages
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -347,7 +365,7 @@ class Music(commands.Cog):
         else:
             state.playlist = state.playlist[index-1:]
             ctx.voice_client.stop()
-            await ctx.send(self._queue_text(state.playlist))
+            await self._send_queue(ctx, state.playlist)
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -359,7 +377,7 @@ class Music(commands.Cog):
             song = state.playlist.pop(song - 1)  # take song at index...
             state.playlist.insert(new_index - 1, song)  # and insert it.
 
-            await ctx.send(self._queue_text(state.playlist))
+            await self._send_queue(ctx, state.playlist)
         else:
             raise commands.CommandError("You must use a valid index.")
 
@@ -374,7 +392,7 @@ class Music(commands.Cog):
             raise commands.CommandError("invalid index")
         else:
             del state.playlist[index]
-            await ctx.send(self._queue_text(state.playlist))
+            await self._send_queue(ctx, state.playlist)
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
@@ -408,7 +426,7 @@ class Music(commands.Cog):
         playlist = list(diction.values())
         state.playlist = playlist
         await ctx.send("Duplicates removed!")
-        await ctx.send(self._queue_text(state.playlist))
+        await self._send_queue(ctx, state.playlist)
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -423,7 +441,7 @@ class Music(commands.Cog):
                 if song.requested_by.display_name == args[0]:
                     state.playlist.remove(song)
             await ctx.send("removed all songs requested by: " + args[0])
-            await ctx.send(self._queue_text(state.playlist))
+            await self._send_queue(ctx, state.playlist)
 
     @commands.guild_only()
     @commands.check(audio_playing)
