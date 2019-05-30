@@ -149,9 +149,14 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, *args):
-        await self._play(ctx, args)
+        url = ""
+        if len(args) > 1:
+            for term in args:
+                url += term + " "
+        await self._play(ctx, url)
 
-    async def _play(self, ctx, args):
+    async def _play(self, ctx, *args):
+        print(args)
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
@@ -171,6 +176,7 @@ class Music(commands.Cog):
             except ValidationError:
                 type = "search"
         if voice.is_connected():
+            print(url)
             result = None
             print(type)
             if type == "url":
@@ -550,7 +556,6 @@ class Music(commands.Cog):
                     return
                 for track in result["items"]:
                     query = track['track']['artists'][0]['name'] + " " + track['track']['name']
-                    print(query)
                     queries.append(query)
             elif "youtube" in url:
                 print("yt")
@@ -558,7 +563,11 @@ class Music(commands.Cog):
             await ctx.send("adding playlist to queue")
             print(queries)
             for query in queries:
-                await self._play(ctx, query)
+                print(query)
+                try:
+                    await self._play(ctx, query)
+                except:
+                    continue
 
 
 '''      
