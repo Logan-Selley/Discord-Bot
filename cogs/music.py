@@ -44,10 +44,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         lyrics key error
         Restructure help command to take less space and expand instructions for given command
         Check queue message length
-        restructure play command to sequentially call play instead of all at once
-        add spotify api handling for playlists
-        move looping to state
-        
+        refactor play/playlist input cleaning
         
 '''
 
@@ -63,7 +60,7 @@ class GuildState:
 
 async def audio_playing(ctx):
     client = ctx.voice_client
-    if client.is_playing:
+    if client.is_playing():
         return True
     else:
         await ctx.send("Not currently playing audio")
@@ -74,11 +71,10 @@ async def in_voice(ctx):
     voice = ctx.author.voice
     bot_voice = ctx.voice_client
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
-        # await ctx.send("in voice")
         return True
     else:
         await ctx.send("You need to be in the channel to do that")
-        raise commands.CommandError("You need to be in the channel to do that")
+        raise commands.CommandError("You aren't in the same channel as me")
 
 
 cfg = config.load_config()
@@ -568,25 +564,4 @@ class Music(commands.Cog):
                     await self._play(ctx, query)
                 except:
                     continue
-
-
-'''      
-{'track': 
-     {'artists': 
-          [{'external_urls': 
-                {'spotify': 'https://open.spotify.com/artist/7jVv8c5Fj3E9VhNjxT4snq'}, 
-            'href': 'https://api.s[38;2;255;107;104mIgnoring exception in cpommand playlist:mtify.com/v1/artists/7jVv8c5Fj3E9VhNjxT4snq', 
-            'id': '7jVv8c5Fj3E9VhNjxT4snq', 
-            'name': 'Lil Nas X', 
-            'type': 'artist', 
-            'uri': 'spotify:artist:7jVv8c5Fj3E9VhNjxT4snq'}, 
-           {'external_urls': 
-                {'spotify': 'https://open.spotify.com/artist/60rpJ9SgigSd16DOAG7GSa'}, 
-            'href': 'https://api.spotify.com/v1/artists/60rpJ9SgigSd16DOAG7GSa', 
-            'id': '60rpJ9SgigSd16DOAG7GSa', 
-            'name': 'Billy Ray Cyrus', 
-            'type': 'artist', 
-            'uri': 'spotify:artist:60rpJ9SgigSd16DOAG7GSa'}], 
-      'name': 'Old Town Road - Remix'}}
-'''
 
