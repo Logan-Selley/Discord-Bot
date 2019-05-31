@@ -92,7 +92,7 @@ class Music(commands.Cog):
         self.config = config[__name__.split(".")[-1]]
         self.states = {}
         credentials = SpotifyClientCredentials(client_id=self.config["spotify_client"],
-                                                   client_secret=self.config["spotify_secret"])
+                                               client_secret=self.config["spotify_secret"])
         self.spot = spotipy_edit.Spotify(client_credentials_manager=credentials)
 
     def get_state(self, guild):
@@ -153,7 +153,6 @@ class Music(commands.Cog):
         await self._play(ctx, url)
 
     async def _play(self, ctx, *args):
-        print(args)
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
@@ -173,16 +172,15 @@ class Music(commands.Cog):
             except ValidationError:
                 type = "search"
         if voice.is_connected():
-            print(url)
             result = None
-            print(type)
+            logging.info("play type: " + type)
             if type == "url":
                 if "youtube" in url:
-                    print("youtube")
+                    logging.info("yt url")
                     result = url
                 elif "spotify" in url:
                     try:
-                        print("spotify")
+                        logging.info("spotify url")
                         track = self.spot.track(url)
                         result = track['artists'][0]['name'] + " " + track['name']
                     except:
@@ -205,7 +203,7 @@ class Music(commands.Cog):
                 return
             state.playlist.append(video)
             logging.info(result + " added to queue")
-            message = await ctx.send(
+            await ctx.send(
                 "Added to queue:", embed=video.get_embed()
             )
             await ctx.message.delete()
@@ -213,7 +211,7 @@ class Music(commands.Cog):
                 logging.info("cold start")
                 self._play_song(voice, state, video, None)
                 state.playlist.pop(0)
-                message = await ctx.send("Now Playing:", embed=video.get_embed())
+                await ctx.send("Now Playing:", embed=video.get_embed())
 
     def _play_song(self, voice, state, song, source):
         state.now_playing = song
@@ -296,19 +294,17 @@ class Music(commands.Cog):
     def _queue_text(self, queue):
         messages = []
         if len(queue) > 0:
-            start = [f"{len(queue)} songs in queue:"]
+            start = str(len(queue)) + " songs in queue:"
             message = start
             for (index, song) in enumerate(queue):
-                add = f" \n {index+1}. **{song.title}** (requested by **{song.requested_by.display_name}**)"
-                print(len(str(add)))
-                print(len(str(message)))
-                print(len(str(add)) + len(str(message)))
-                if (len(str(add)) + len(str(message))) >= 2000:
+                add = "\n" + str(index+1) + ". " + song.title + " (requested by " + song.requested_by.display_name + ")"
+                if (len(add) + len(message)) >= 2000:
+                    logging.info("max message sized reached, starting new message")
                     messages.append(message)
                     message = ""
                     message += add
-                    index += 1
                 else:
+
                     message += add
             messages.append(message)
             return messages
@@ -452,15 +448,14 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         voice = ctx.voice_client
         duration = state.now_playing.duration
-        print(duration)
-        print(secs)
         if secs is None:
+            logging.info("invalid seek timestamp")
             await ctx.send("invalid timestamp")
         else:
             if secs > duration:
+                logging.info("seek timestamp too long")
                 await ctx.send("Timestamp is longer than the song dummy")
             else:
-                print("passed")
                 source = discord.PCMVolumeTransformer(
                     discord.FFmpegPCMAudio(source=state.now_playing.stream_url,
                                            before_options='-ss ' + str(timestamp) +
@@ -471,20 +466,6 @@ class Music(commands.Cog):
                 song.seek = source
                 state.playlist.insert(0, song)
                 voice.stop()
-
-    @commands.guild_only()
-    @commands.check(audio_playing)
-    @commands.check(in_voice)
-    @commands.command(pass_context=True, name='fastforward', aliases=["ff"])
-    async def ff(self, ctx, timestamp):
-        print("ff")
-
-    @commands.guild_only()
-    @commands.check(audio_playing)
-    @commands.check(in_voice)
-    @commands.command(pass_context=True, name='rewind', aliases=["rw"])
-    async def rw(self, ctx, timestamp):
-        print("rw")
 
     async def _stamp_to_sec(self, ctx, timestamp):
         state = self.get_state(ctx.guild)
@@ -526,7 +507,7 @@ class Music(commands.Cog):
             if state.looping is None:
                 await ctx.send("not currently looping")
             else:
-                await ctx.send("currently looping: " + str(self.looping))
+                await ctx.send("currently looping: " + str(state.looping))
         elif args[0] == "queue" or args[0] == "q":
             state.looping = "queue"
             await ctx.send("now looping this queue")
@@ -555,11 +536,11 @@ class Music(commands.Cog):
                 await ctx.send("invalid url")
                 return
             if "spotify" in url:
-                print("spotify")
+                logging.info("spotify playlist")
                 try:
                     pid = url.split("playlist/", 1)[1]
                     pid = pid.split("?si=", 1)[0]
-                    print(pid)
+                    logging.info("pid = " + pid)
                 except:
                     await ctx.send("Error handling url, make sure it's the right type")
                     return
@@ -572,14 +553,13 @@ class Music(commands.Cog):
                     query = track['track']['artists'][0]['name'] + " " + track['track']['name']
                     queries.append(query)
             elif "youtube" in url:
-                print("yt")
+                logging.info("yt playlist")
 
             await ctx.send("adding playlist to queue")
-            print(queries)
             for query in queries:
-                print(query)
                 try:
                     await self._play(ctx, query)
                 except:
+                    logging.warning("playlist query error")
                     continue
 
