@@ -33,7 +33,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         volume                              !v  !volume     [required argument]         COMPLETE
         shuffle                             !shuff  !shuffle                            COMPLETE
         removeusersongs                     !rus remove songs requested by given user (works with nicknames)  COMPLETE
-        playlist                            !pl add playlist (yt or spotify) to queue   TESTING
+        playlist                            !pl add playlist (yt or spotify) to queue   COMPLETE
         
         
         
@@ -586,6 +586,7 @@ class Music(commands.Cog):
             for query in queries:
                 try:
                     await self._play(ctx, query, True)
+                    await asyncio.sleep(1)
                 except:
                     logging.warning("playlist query error")
                     continue
