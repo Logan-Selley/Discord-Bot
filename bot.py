@@ -28,28 +28,40 @@ async def wink(ctx):
 
 
 @bot.command(name='help')
-async def help(ctx):
+async def help(ctx, *args):
+    if len(args) > 1:
+        await ctx.send("That's not a command or command group!")
+        return
     prefix = cfg["prefix"]
+    arg = args[0]
     commands = {}
 
     # MUSIC
-    commands[prefix + "join: j"] = "bot joins the user's voice channel"
-    commands[prefix + "leave: l"] = "bot leaves it's current voice channel"
-    commands[prefix + "play: p"] = "adds the given URL or search query to the music queue"
-    commands[prefix + "pause: pa"] = "pause the bot's music playback"
-    commands[prefix + "resume: re"] = "resume the bot's music playback"
-    commands[prefix + "skip: s"] = "skip the current song playing"
-    commands[prefix + "skipto: s2, skip2, sto"] = "skip to a specific song in the queue by it's queue number"
-    commands[prefix + "queue: q"] = "display the current queue"
-    commands[prefix + "clear: c"] = "clear the current queue"
-    commands[prefix + "volume: v"] = "change the volume of music playback by setting a new volume value"
-    commands[prefix + "shuffle: shuff, sh"] = "shuffles the current queue"
-    commands[prefix + "nowplaying: np"] = "display the current song plaaying"
-    commands[prefix + "lyrics: ly"] = "search and show the lyrics of the current song or the given search query"
-    commands[prefix + "duplicates: dupe, d"] = "remove  duplicate items from music queue"
-    commands[prefix + "removeusersongs: rus"] = "removes all songs requested by the given user, works with nicknames"
-    commands[prefix + "seek"] = "start the currently playing audio at the given timestamp"
+    join = {prefix + "join": "aliases= {j}, bot joins the user's voice channel"}
+    leave = {prefix + "leave": "aliases= {l}, bot leaves it's current voice channel"}
+    play = {prefix + "play": "aliases= {p}, adds the given Spotify/Youtube url or search query to the music queue"}
+    pause = {prefix + "pause": "aliases= {pa}, pauses the bot's music playback"}
+    resume = {prefix + "resume": "aliases= {re}, resumes the bot's music playback"}
+    skip = {prefix + "skip": "aliases= {s}, skips the current track"}
+    skipto = {prefix + "skipto": "aliases= {s2, skip2, sto}, skip to a specific track in the queue by it's queue "
+                                 "number"}
+    queue = {prefix + "queue": "aliases= {q}, displays the current song queue"}
+    clear = {prefix + "clear": "aliases= {c}, clears the current queue of all tracks"}
+    volume = {prefix + "volume": "aliases= {v}, either displays the current volume or changes it to the given number"}
+    shuffle = {prefix + "shuffle": "aliases= {shuff, sh}, shuffles the current queue"}
+    nowplaying = {prefix + "nowplaying": "aliases= {np}, displays the currently playing track"}
+    lyrics = {prefix + "lyrics": "aliases= {ly}, displays the current track's lyrics or lyrics of the given song title"}
+    duplicates = {prefix + "duplicates": "aliases= {dupe, d}, removes duplicate tracks from the music queue"}
+    removeusersongs = {prefix + "removeusersongs": "aliases= {rus}, removes all songs requested by the given user"
+                                                   "works with nicknames/displaynames"}
+    seek = {prefix + "seek": "aliases= {}, start the current track at the given timestamp, form: 2:20 for"
+                             "2 minutes, 20 seconds"}
+    playlist = {prefix + "playlist": "aliases= {pl}, adds the first 100 tracks from the given spotify/youtube url to"
+                                     "the queue"}
+
+
     # GENERAL
+    help = {}
     commands[prefix + "help"] = "You just called this command, congrats"
     commands[prefix + "ping"] = "test the bot's responsiveness"
     commands[prefix + "prefix: pre"] = "display the current command prefix"

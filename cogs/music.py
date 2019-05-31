@@ -5,10 +5,10 @@ import asyncio
 import spotipy_edit
 import logging
 from discord.ext import commands
-from video import Video, Playlist
+from video import Video
 import config
 from lyrics_extractor import Song_Lyrics
-from urlvalidator import validate_url, validate_email, ValidationError
+from urlvalidator import validate_url, ValidationError
 from spotipy.oauth2 import SpotifyClientCredentials
 
 
@@ -32,8 +32,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
         remove duplicates                   !dupe   !d                                  COMPLETE
         volume                              !v  !volume     [required argument]         COMPLETE
         shuffle                             !shuff  !shuffle                            COMPLETE
-        removeusersongs                     !rus remove songs requested by given user (works with nicknames)        COMPLETE
-        playlist                            !pl add playlist (yt or spotify) to queue   IN PROGRESS
+        removeusersongs                     !rus remove songs requested by given user (works with nicknames)  COMPLETE
+        playlist                            !pl add playlist (yt or spotify) to queue   TESTING
         
         
         
@@ -150,7 +150,8 @@ class Music(commands.Cog):
         url = self.argument_concat(args)
         await self._play(ctx, url, False)
 
-    def argument_concat(self, args):
+    @staticmethod
+    def argument_concat(args):
         url = ""
         if len(args) > 1:
             for term in args:
@@ -160,7 +161,8 @@ class Music(commands.Cog):
 
         return url
 
-    def url_validation(self, url):
+    @staticmethod
+    def url_validation(url):
         try:
             validate_url(url)
             return True
@@ -170,15 +172,14 @@ class Music(commands.Cog):
     async def _play(self, ctx, url, playlist):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
-        type = ""
         if self.url_validation(url):
-            type = "url"
+            search_type = "url"
         else:
-            type = "search"
+            search_type = "search"
         if voice.is_connected():
             result = None
-            logging.info("play type: " + type)
-            if type == "url":
+            logging.info("play type: " + search_type)
+            if search_type == "url":
                 if "youtube" in url:
                     logging.info("yt url")
                     result = url
@@ -190,7 +191,7 @@ class Music(commands.Cog):
                         print(result)
                     except:
                         await ctx.send("invalid spotify url")
-            elif type == "search":
+            elif search_type == "search":
                 try:
                     search = self.spot.search(q=url, limit=1, type='track')
                     track = search['tracks']['items'][0]
@@ -200,7 +201,7 @@ class Music(commands.Cog):
                     result = url
             try:
                 video = Video(result, ctx.author)
-            except youtube_dl.DownloadError as e:
+            except ytdl.DownloadError as e:
                 logging.warning(f"Error downloading video: {e}")
                 await ctx.send(
                     "There was an error downloading your video, maybe an invalid url or no search results"
@@ -208,11 +209,11 @@ class Music(commands.Cog):
                 return
             state.playlist.append(video)
             logging.info(result + " added to queue")
-            if not Playlist:
+            if not playlist:
                 await ctx.send(
                     "Added to queue:", embed=video.get_embed()
                 )
-            await ctx.message.delete()
+                await ctx.message.delete()
             if not voice.is_playing():
                 logging.info("cold start")
                 self._play_song(voice, state, video, None)
@@ -228,7 +229,7 @@ class Music(commands.Cog):
                 source = self._get_source(song, state)
         logging.info(f"Now Playing '{song.title}'")
 
-        def after_playing(err):
+        def after_playing():
             if state.looping == "song":
                 state.playlist.insert(0, song)
             elif state.looping == "queue":
@@ -242,10 +243,11 @@ class Music(commands.Cog):
 
         voice.play(source, after=after_playing)
 
-    def _get_source(self, song, state):
+    @staticmethod
+    def _get_source(song, state):
         source = discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                                           '-reconnect_delay_max 5'),
+                                                                          '-reconnect_delay_max 5'),
             volume=state.volume
         )
         return source
@@ -297,7 +299,8 @@ class Music(commands.Cog):
         for string in messages:
             await ctx.send(string)
 
-    def _queue_text(self, queue):
+    @staticmethod
+    def _queue_text(queue):
         messages = []
         if len(queue) > 0:
             start = str(len(queue)) + " songs in queue:"
@@ -323,7 +326,6 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
-        state = self.get_state(ctx.guild)
         voice = ctx.voice_client
         voice.stop()
         logging.info("skipped audio")
@@ -334,7 +336,7 @@ class Music(commands.Cog):
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
         state = self.get_state(ctx.guild)
-        message = await ctx.send("Now Playing: ", embed=state.now_playing.get_embed())
+        await ctx.send("Now Playing: ", embed=state.now_playing.get_embed())
 
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -473,8 +475,8 @@ class Music(commands.Cog):
                 state.playlist.insert(0, song)
                 voice.stop()
 
-    async def _stamp_to_sec(self, ctx, timestamp):
-        state = self.get_state(ctx.guild)
+    @staticmethod
+    async def _stamp_to_sec(ctx, timestamp):
         parts = timestamp.split(":")
         if len(parts) < 1:
             await ctx.send("Invalid timestamp")
@@ -506,7 +508,7 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.check(audio_playing)
     @commands.check(in_voice)
-    @commands.command(pass_context = True, name='loop', aliases=['looping'])
+    @commands.command(pass_context=True, name='loop', aliases=['looping'])
     async def loop(self, ctx, *args):
         state = self.get_state(ctx.guild)
         if len(args) == 0:
@@ -530,7 +532,6 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='playlist', aliases=['pl'])
     async def playlist(self, ctx, *args):
-        state = self.get_state(ctx.guild)
         queries = []
         if len(args) == 0:
             await ctx.send("No url given")
@@ -559,25 +560,27 @@ class Music(commands.Cog):
                     queries.append(query)
             elif "youtube" in url:
                 logging.info("yt playlist")
-                YTDL_OPTS = {
+                ytdl_opts = {
                     "default_search": "auto",
                     "format": "bestaudio/best",
                     "quiet": True,
                     "extract_flat": "in_playlist",
                 }
-                with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
+                with ytdl.YoutubeDL(ytdl_opts) as ydl:
                     info = ydl.extract_info(url, download=False)
                     if "_type" in info and info["_type"] == "playlist":
+                        pid = info["title"]
                         for video in info['entries']:
+
                             if not video:
                                 logging.warning("ERROR: unable to get video info, continuing")
                                 continue
                             else:
-                                print(video["webpage_url"])
-                                queries.append(video["webpage_url"])
+                                queries.append("https://www.youtube.com/watch?v=" + video["url"])
                     else:
                         logging.warning("url is not a yt playlist")
                         await ctx.send("That's not a playlist!")
+                        return
 
             await ctx.send("adding playlist: " + pid + " to queue")
             for query in queries:
@@ -587,4 +590,3 @@ class Music(commands.Cog):
                     logging.warning("playlist query error")
                     continue
             await ctx.send("Playlist added!")
-

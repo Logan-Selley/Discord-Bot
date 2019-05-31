@@ -50,28 +50,3 @@ class Video:
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         return embed
-
-
-class Playlist:
-
-    def __init__(self, url_or_search, requested_by):
-        arr = self._get_info_playlist(url_or_search)
-        if len(arr) == 0:
-            print("ERROR: empty playlist")
-        self.playlist = []
-        for video in arr:
-            url = video["url"]
-            arr.append(Video(url, requested_by))
-
-    def _get_info_playlist(self, url):
-        with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            playlist_dict = ydl.extract_info(url, download=False)
-            playlist = []
-            if "_type" in playlist_dict and playlist_dict["_type"] == "playlist":
-                for video in playlist_dict['entries']:
-                    if not video:
-                        print("ERROR: Unable to get info. Continuing")
-                        continue
-                    playlist.append(video)
-
-            return playlist
