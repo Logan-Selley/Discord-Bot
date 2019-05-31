@@ -1,6 +1,6 @@
 import discord
 import random
-import youtube_dl
+import youtube_dl as ytdl
 import asyncio
 import spotipy_edit
 import logging
@@ -148,7 +148,7 @@ class Music(commands.Cog):
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
         url = self.argument_concat(args)
-        await self._play(ctx, url)
+        await self._play(ctx, url, False)
 
     def argument_concat(self, args):
         url = ""
@@ -167,7 +167,7 @@ class Music(commands.Cog):
         except ValidationError:
             return False
 
-    async def _play(self, ctx, url):
+    async def _play(self, ctx, url, playlist):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
         type = ""
@@ -208,9 +208,10 @@ class Music(commands.Cog):
                 return
             state.playlist.append(video)
             logging.info(result + " added to queue")
-            await ctx.send(
-                "Added to queue:", embed=video.get_embed()
-            )
+            if not Playlist:
+                await ctx.send(
+                    "Added to queue:", embed=video.get_embed()
+                )
             await ctx.message.delete()
             if not voice.is_playing():
                 logging.info("cold start")
@@ -534,10 +535,9 @@ class Music(commands.Cog):
         if len(args) == 0:
             await ctx.send("No url given")
         else:
-            url = args[0]
-            try:
-                validate_url(url)
-            except ValidationError:
+            pid = None
+            url = self.argument_concat(args)
+            if not self.url_validation(url):
                 await ctx.send("invalid url")
                 return
             if "spotify" in url:
@@ -559,12 +559,32 @@ class Music(commands.Cog):
                     queries.append(query)
             elif "youtube" in url:
                 logging.info("yt playlist")
+                YTDL_OPTS = {
+                    "default_search": "auto",
+                    "format": "bestaudio/best",
+                    "quiet": True,
+                    "extract_flat": "in_playlist",
+                }
+                with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
+                    info = ydl.extract_info(url, download=False)
+                    if "_type" in info and info["_type"] == "playlist":
+                        for video in info['entries']:
+                            if not video:
+                                logging.warning("ERROR: unable to get video info, continuing")
+                                continue
+                            else:
+                                print(video["webpage_url"])
+                                queries.append(video["webpage_url"])
+                    else:
+                        logging.warning("url is not a yt playlist")
+                        await ctx.send("That's not a playlist!")
 
-            await ctx.send("adding playlist to queue")
+            await ctx.send("adding playlist: " + pid + " to queue")
             for query in queries:
                 try:
-                    await self._play(ctx, query)
+                    await self._play(ctx, query, True)
                 except:
                     logging.warning("playlist query error")
                     continue
+            await ctx.send("Playlist added!")
 
