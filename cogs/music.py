@@ -43,9 +43,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         catch spaces in usernames for 
         lyrics key error
         Restructure help command to take less space and expand instructions for given command
-        Check queue message length
-        refactor play/playlist input cleaning
-        refactor url check
+        pick from yt search results?
         
 '''
 
@@ -146,31 +144,37 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, *args):
-        url = ""
-        if len(args) > 1:
-            for term in args:
-                url += term + " "
-        await self._play(ctx, url)
-
-    async def _play(self, ctx, *args):
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
-        voice = ctx.voice_client
-        state = self.get_state(ctx.guild)
+        url = self.argument_concat(args)
+        await self._play(ctx, url)
+
+    def argument_concat(self, args):
         url = ""
-        type = None
         if len(args) > 1:
             for term in args:
                 url += term + " "
-                type = "search"
         else:
             url = args[0]
-            try:
-                validate_url(url)
-                type = "url"
-            except ValidationError:
-                type = "search"
+
+        return url
+
+    def url_validation(self, url):
+        try:
+            validate_url(url)
+            return True
+        except ValidationError:
+            return False
+
+    async def _play(self, ctx, url):
+        voice = ctx.voice_client
+        state = self.get_state(ctx.guild)
+        type = ""
+        if self.url_validation(url):
+            type = "url"
+        else:
+            type = "search"
         if voice.is_connected():
             result = None
             logging.info("play type: " + type)
@@ -183,8 +187,9 @@ class Music(commands.Cog):
                         logging.info("spotify url")
                         track = self.spot.track(url)
                         result = track['artists'][0]['name'] + " " + track['name']
+                        print(result)
                     except:
-                        await ctx.send("invalid url")
+                        await ctx.send("invalid spotify url")
             elif type == "search":
                 try:
                     search = self.spot.search(q=url, limit=1, type='track')
@@ -198,7 +203,7 @@ class Music(commands.Cog):
             except youtube_dl.DownloadError as e:
                 logging.warning(f"Error downloading video: {e}")
                 await ctx.send(
-                    "There was an error downloading your video"
+                    "There was an error downloading your video, maybe an invalid url or no search results"
                 )
                 return
             state.playlist.append(video)
