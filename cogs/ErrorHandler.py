@@ -9,6 +9,7 @@ def setup(bot):
 
 
 class CommandErrorHandler(commands.Cog):
+    """Cog that fixes things when you fuck things up"""
     def __init__(self, bot):
         self.bot = bot
 

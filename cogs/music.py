@@ -84,6 +84,7 @@ def setup(bot):
 
 
 class Music(commands.Cog):
+    """Play music/playlists from Youtube or Spotify"""
 
     def __init__(self, bot, config):
         self.bot = bot
@@ -103,6 +104,8 @@ class Music(commands.Cog):
 
     @commands.command(pass_context=True, name='join', aliases=['j'])
     async def join(self, ctx):
+        """Have the bot join the user's current channel
+        Aliases= {j}"""
         author = ctx.message.author
         try:
             channel = author.voice.channel
@@ -125,6 +128,8 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='leave', aliases=['l'])
     async def leave(self, ctx):
+        """Have the bot leave it's current channel
+        Aliases= {l}"""
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
         if voice is not None and voice.is_connected():
@@ -144,6 +149,8 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='play', aliases=['p'])
     async def play(self, ctx, *args):
+        """Attempts to play the given input, accepts Youtube video links, or Spotify track links, anything else is treated as a search query
+        Aliases= {p}"""
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
@@ -257,6 +264,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='volume', aliases=['v'])
     async def volume(self, ctx, *args: float):
+        """Displays the current playback volume or adjusts it to the given number
+        Aliases= {v}"""
         state = self.get_state(ctx.guild)
         if len(args) == 0:
             await ctx.send(str(state.volume * 100))
@@ -280,17 +289,23 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='pause', aliases=['pa'])
     async def pause(self, ctx):
+        """Pauses current audio
+        Aliases= {pa}"""
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
 
     @commands.command(pass_context=True, name='resume', aliases=['re'])
     async def resume(self, ctx):
+        """Resumes current audio
+        Aliases= {re}"""
         ctx.voice_client.resume()
 
     @commands.guild_only()
-    # @commands.check(audio_playing)
+    @commands.check(audio_playing)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
+        """Displays the queue of tracks to be played
+        Aliases= {q}"""
         state = self.get_state(ctx.guild)
         await self._send_queue(ctx, state.playlist)
 
@@ -326,6 +341,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='skip', aliases=['s'])
     async def skip(self, ctx):
+        """Skips the current track
+        Aliases= {s}"""
         voice = ctx.voice_client
         voice.stop()
         logging.info("skipped audio")
@@ -335,6 +352,8 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.command(pass_context=True, name='now playing', aliases=['np'])
     async def now_playing(self, ctx):
+        """Displays the current track
+        Aliases= {np}"""
         state = self.get_state(ctx.guild)
         await ctx.send("Now Playing: ", embed=state.now_playing.get_embed())
 
@@ -342,6 +361,8 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.command(name='clear', aliases=['c'])
     async def clear(self, ctx):
+        """Removes everything from the queue
+        Aliases= {c}"""
         state = self.get_state(ctx.guild)
         state.playlist = []
 
@@ -349,6 +370,8 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.command(name='shuffle', aliases=['sh', 'shuff'])
     async def shuffle(self, ctx):
+        """Shuffles the queue order
+        Aliases= {shuff, sh}"""
         state = self.get_state(ctx.guild)
         random.shuffle(state.playlist)
         await ctx.send("Shuffled!")
@@ -359,6 +382,8 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     @commands.command(pass_context=True, name='skipto', aliases=['s2', 'stwo', 'sto', 'skip2'])
     async def skipto(self, ctx, index: int):
+        """Skips to the given queue number
+        Aliases= {s2, stwo, sto, skip2}"""
         state = self.get_state(ctx.guild)
         if index is None:
             await ctx.send("No index given")
@@ -376,6 +401,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='move', aliases=['m'])
     async def move(self, ctx, song: int, new_index: int):
+        """Puts the given track (by it's queue number) at the given queue index
+        Aliases= {m}"""
         state = self.get_state(ctx.guild)
         if 1 <= song <= len(state.playlist) and 1 <= new_index:
             song = state.playlist.pop(song - 1)  # take song at index...
@@ -390,6 +417,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='remove', aliases=['r'])
     async def remove(self, ctx, index: int):
+        """removes the track at the given queue number
+        Aliases= {r}"""
         state = self.get_state(ctx.guild)
         index -= 1
         if index is None or index < 1 or index > len(state.playlist):
@@ -401,21 +430,22 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
     async def lyrics(self, ctx, *args):
+        """Displays the lyrics of the current track, or the link/search query provided
+        Aliases= {ly}"""
         state = self.get_state(ctx.guild)
-        extract = Song_Lyrics(cfg["search_key"], cfg["search_id"])
+        extract = Song_Lyrics(self.config["search_key"], self.config["search_id"])
         if len(args) == 0:  # now playing lyrics
             if audio_playing(ctx):
                 playing = state.now_playing
                 title, lyrics = extract.get_lyrics(playing.title)
+                print(len(lyrics))
+                print(lyrics)
                 await ctx.send(title + "\n" + lyrics)
             else:
                 await ctx.send("Nothing is playing currently, add a song title to the command to search")
         else:  # search lyrics
-            song = ""
-            for a in args:
-                song += a
-                song += " "
-            title, lyrics = extract.get_lyrics(args[0])
+            song = self.argument_concat(args)
+            title, lyrics = extract.get_lyrics(song)
             await ctx.send(title + "\n" + lyrics)
 
     @commands.guild_only()
@@ -423,6 +453,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='duplicates', aliases=['d', 'dupe'])
     async def duplicate(self, ctx):
+        """Removes duplicate tracks from the queue
+        Aliases= {d, dupe}"""
         state = self.get_state(ctx.guild)
         diction = {}
         for song in state.playlist:
@@ -437,6 +469,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='removeusersongs', aliases=['rus'])
     async def remove_user_songs(self, ctx, *args):
+        """Removes all tracks requested by the given user, accepts nicknames
+        Aliases= {rus}"""
         state = self.get_state(ctx.guild)
         if len(args) == 0:
             await ctx.send("no user given, add a username to delete their songs.")
@@ -452,6 +486,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='seek')
     async def seek(self, ctx, timestamp):
+        """Moves the current tracks audio playback to the given timestamp, eg: 02:00
+        Aliases= {}"""
         secs = await self._stamp_to_sec(ctx, timestamp)
         state = self.get_state(ctx.guild)
         voice = ctx.voice_client
@@ -510,6 +546,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='loop', aliases=['looping'])
     async def loop(self, ctx, *args):
+        """Displays looping status, change status by passing "song", "queue" or "stop" for desired status
+        Aliases= {looping}"""
         state = self.get_state(ctx.guild)
         if len(args) == 0:
             if state.looping is None:
@@ -532,6 +570,8 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='playlist', aliases=['pl'])
     async def playlist(self, ctx, *args):
+        """Takes a youtube or Spotify playlist link and add it to the queue (Spotify playlists limited to first 100)
+        Aliases= {pl}"""
         queries = []
         if len(args) == 0:
             await ctx.send("No url given")

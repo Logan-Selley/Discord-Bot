@@ -10,29 +10,36 @@ def setup(bot):
 
 
 class General(commands.Cog):
-
+    """General use commands that don't fit anywhere else"""
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(pass_context=True, name='ping')
     async def ping(self, ctx):
+        """Simple bot response command
+        Aliases= {}"""
         await ctx.send('pong')
 
     @commands.command(pass_context=True, name='wink')
     async def wink(self, ctx):
+        """Simple bot response command
+        Aliases= {}"""
         await ctx.send('wonk')
 
     @commands.command(pass_context=True, name='pre', aliases=['prefix'])
     async def pre(self, ctx):
+        """Displays the current command prefix
+        Aliases= {prefix}"""
         await ctx.send('Current prefix: ' + cfg["prefix"])
 
     '''Written by Jared Newsom(AKA Jared M.F.)!'''
 
     @commands.command()
-    @commands.has_permissions(add_reactions=True,embed_links=True)
+    @commands.has_permissions(add_reactions=True, embed_links=True)
     async def help(self, ctx, *cog):
         """Gets all cogs and commands of mine."""
         try:
+            halp = None
             if not cog:
                 halp = discord.Embed(title='Cog Listing and Uncatergorized Commands',
                                      description='Use `!help *cog*` to find out more about them!\n'
@@ -41,7 +48,7 @@ class General(commands.Cog):
                 for x in self.bot.cogs:
                     cogs_desc += ('{} - {}'.format(x, self.bot.cogs[x].__doc__)+'\n')
                 halp.add_field(name='Cogs', value=cogs_desc[0:len(cogs_desc)-1], inline=False)
-                cmds_desc = ''
+                cmds_desc = 'None '
                 for y in self.bot.walk_commands():
                     if not y.cog_name and not y.hidden:
                         cmds_desc += ('{} - {}'.format(y.name, y.help)+'\n')

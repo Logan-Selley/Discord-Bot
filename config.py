@@ -7,8 +7,10 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 [music]
 # Options for the music commands
 "max_volume"=250 # Max audio volume. Set to -1 for unlimited.
+# Lyrics search engine keys:
 "search_key"=""
 "search_id"=""
+# Spotify API keys:
 \"spotify_client\"=\"\"
 \"spotify_secret\"=\"\"
 """
