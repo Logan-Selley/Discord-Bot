@@ -430,23 +430,43 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name='lyrics', aliases=['ly'])
     async def lyrics(self, ctx, *args):
-        """Displays the lyrics of the current track, or the link/search query provided
+        """Displays the lyrics of the current track, or the search query provided
         Aliases= {ly}"""
         state = self.get_state(ctx.guild)
         extract = Song_Lyrics(self.config["search_key"], self.config["search_id"])
+        messages = []
+        title = None
+        lyrics = None
         if len(args) == 0:  # now playing lyrics
-            if audio_playing(ctx):
+            if ctx.voice_client is not None and ctx.voice_client.is_playing():
                 playing = state.now_playing
                 title, lyrics = extract.get_lyrics(playing.title)
                 print(len(lyrics))
                 print(lyrics)
-                await ctx.send(title + "\n" + lyrics)
+
             else:
                 await ctx.send("Nothing is playing currently, add a song title to the command to search")
+                return
         else:  # search lyrics
             song = self.argument_concat(args)
+            if self.url_validation(song):
+                await ctx.send("This doesn't take urls fam, just enter the title of the song")
+                return
             title, lyrics = extract.get_lyrics(song)
-            await ctx.send(title + "\n" + lyrics)
+        message = title + "\n" + lyrics
+        if len(message) > 2000:
+            while len(message) > 2000:
+                index = 2000
+                while message[index] != "\n":
+                    index -= 1
+                mes = message[:index]
+                sage = message[index:]
+                messages.append(mes)
+                message = sage
+        else:
+            messages.append(message)
+        for string in messages:
+            await ctx.send(string)
 
     @commands.guild_only()
     @commands.check(audio_playing)
