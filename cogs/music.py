@@ -16,9 +16,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
     Commands to add:
         change prefix                        MOVED TO CONFIG
         prefix  (display)                   !pre                                        COMPLETE
-        youtube/search                      !p  !play [required argument]               COMPLETE?
+        youtube/search                      !p  !play [required argument]               COMPLETE
         queue                               !q  !queue                                  COMPLETE
-        lyrics of now playing/given song    !ly !lyrics [optional argument]             BROKE AF
+        lyrics of now playing/given song    !ly !lyrics [optional argument]             COMPLETE
         display all commands                !help                                       COMPLETE
         join/disconnect                     !j/!l   !join/!leave                        COMPLETE
         now playing                         !np !so  !nowplaying !song                  COMPLETE
@@ -38,12 +38,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         
         
         testing notes
-        Lyrics working, but bad request issue ???????
-        bot catch bad lyrics requests
-        catch spaces in usernames for 
-        lyrics key error
-        Restructure help command to take less space and expand instructions for given command
-        pick from yt search results?
+        
         
 '''
 
