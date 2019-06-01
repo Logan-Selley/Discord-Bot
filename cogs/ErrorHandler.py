@@ -42,6 +42,10 @@ class CommandErrorHandler(commands.Cog):
             except:
                 pass
 
+        if isinstance(error, commands.MissingPermissions):
+            text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
+            await ctx.send(text)
+
         # For this error example we check to see where it came from...
         elif isinstance(error, commands.BadArgument):
             if ctx.command.qualified_name == 'tag list':  # Check if the command being invoked is 'tag list'

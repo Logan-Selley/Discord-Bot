@@ -24,7 +24,7 @@ def load_config(path="./config.toml"):
     else:
         with open(path, "w") as config:
             config.write(EXAMPLE_CONFIG)
-            logging.warn(
+            logging.warning(
                 f"No config file found. Creating a default config file at {path}"
             )
         return load_config(path=path)
