@@ -2,7 +2,7 @@ import discord
 import logging
 import sys
 from discord.ext import commands
-from cogs import music, ErrorHandler, General
+from cogs import music, ErrorHandler, General, Moderation
 import config
 
 cfg = config.load_config()
@@ -11,7 +11,7 @@ bot = commands.Bot(command_prefix=cfg["prefix"], case_insensitive=True)
 bot.remove_command('help')
 
 
-COGS = ['cogs.music', 'cogs.ErrorHandler', 'cogs.General']
+COGS = ['cogs.music', 'cogs.ErrorHandler', 'cogs.General', 'cogs.Moderation']
 
 
 def add_cogs(bot):

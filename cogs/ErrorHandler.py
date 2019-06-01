@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands import CheckFailure
 import sys
 import traceback
 
@@ -45,6 +46,13 @@ class CommandErrorHandler(commands.Cog):
         if isinstance(error, commands.MissingPermissions):
             text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
             await ctx.send(text)
+
+        if isinstance(error, CheckFailure):
+            text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
+            await ctx.send(text)
+
+        if isinstance(error, commands.BadArgument):
+            await ctx.send()
 
         # For this error example we check to see where it came from...
         elif isinstance(error, commands.BadArgument):
