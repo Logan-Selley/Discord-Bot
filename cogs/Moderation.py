@@ -1,7 +1,7 @@
 import discord
-from discord import member, permissions
 from discord.ext import commands
 from discord.ext.commands import has_permissions, CheckFailure
+import asyncio
 
 
 def setup(bot):
@@ -57,3 +57,21 @@ class Moderation(commands.Cog):
         await member.send(message)
         await ctx.guild.kick(member)
         await ctx.channel.send(f"{member} was banned!")
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="prune", aliases=["pr"])
+    @has_permissions(manage_messages=True)
+    async def prune(self, ctx, count: int):
+        """Deletes the last (given number) of messages up to 100
+        aliases= {pr}"""
+        messages = []
+        print(count)
+        if count is None:
+            await ctx.send("You need to tell me how many messages to delete!")
+            return
+        if count > 100:
+            count = 100
+        async for x in ctx.channel.audit_logs(limit=count):
+            messages.append(x)
+        await self.bot.delete_messages(messages)
+        await ctx.send("Deleted the last " + str(count) + " messages!")
