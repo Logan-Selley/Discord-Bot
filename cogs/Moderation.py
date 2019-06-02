@@ -145,9 +145,11 @@ class Moderation(commands.Cog):
             await ctx.send("Deleted the last " + str(count) + " messages by " + str(member) + "!")
 
     @commands.guild_only()
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, name="warn", aliases=[])
     @has_permissions(manage_roles=True, ban_members=True)
     async def warn(self, ctx, user: discord.User, *reason: str):
+        """Function to log warnings/offenses, just pass the username, and reason for warning
+        aliases= {}"""
         report = config.load_warns()
         if not reason:
             await ctx.send("Please provide a reason")
@@ -177,8 +179,10 @@ class Moderation(commands.Cog):
         await ctx.send(str(user) + " has been warned for: " + reason)
 
     @commands.guild_only()
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, name="warnings", aliases=[])
     async def warnings(self, ctx, user: discord.User = None):
+        """function to retrieve the warnings of the given user
+        aliases= {}"""
         if user is None:
             await ctx.send("you have to give me a user to get their warnings!")
             return
@@ -188,7 +192,7 @@ class Moderation(commands.Cog):
                 this_guild = report['guilds'].index(guild)
                 break
         else:
-            await ctx.send(f"{user.name} has never been reported")
+            await ctx.send(f"{user.name} has never been warned")
             return
         for current_user in report['guilds'][this_guild]['users']:
             if user.name == current_user['name']:
@@ -196,5 +200,5 @@ class Moderation(commands.Cog):
                               f"{','.join(current_user['reasons'])}")
                 break
         else:
-            await ctx.send(f"{user.name} has never been reported")
+            await ctx.send(f"{user.name} has never been warned")
 
