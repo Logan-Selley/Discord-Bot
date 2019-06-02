@@ -47,8 +47,26 @@ class CommandErrorHandler(commands.Cog):
             text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
             await ctx.send(text)
 
+        if isinstance(error, commands.BotMissingPermissions):
+            await ctx.send("I don't have permission to do that!")
+
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send("You can't use that command yet!")
+
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("You didn't give me enough arguments for that command!")
+
+        if isinstance(error, commands.TooManyArguments):
+            await ctx.send("Woah!, Too much information!")
+
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("I don't know that command!")
+
+        if isinstance(error, commands.ArgumentParsingError):
+            await ctx.send("I'm not sure how to read the argument you gave me!")
+
         if isinstance(error, commands.BadArgument):
-            await ctx.send()
+            await ctx.send("You gave me a bad argument! How am I supposed to work in these conditions!")
 
         # For this error example we check to see where it came from...
         elif isinstance(error, commands.BadArgument):
