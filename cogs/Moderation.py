@@ -2,17 +2,24 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions, CheckFailure
 import asyncio
+import config
+import toml
+import logging
+import os
+
+cfg = config.load_config()
 
 
 def setup(bot):
-    bot.add_cog(Moderation(bot))
+    bot.add_cog(Moderation(bot, cfg))
 
 
 class Moderation(commands.Cog):
     """Cog for moderator tools"""
 
-    def __init__(self, bot):
+    def __init__(self, bot, cfg):
         self.bot = bot
+        self.cfg = cfg
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="kick", aliases=[])
@@ -136,4 +143,32 @@ class Moderation(commands.Cog):
             await ctx.channel.purge(limit=count, check=check_user)
             await ctx.send("Deleted the last " + str(count) + " messages by " + str(member) + "!")
 
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="warn", aliases=[])
+    @has_permissions(ban_members=True)
+    async def warn(self, ctx, member: discord.Member = None):
+        """Gives a warning to the given user and auto bans after a certain amount of warnings definied in the config
+        aliases= {}"""
+
+        warns = config.load_warns()
+
+        if member is None:
+            await ctx.send("You didn't give me anyone to warn!")
+            return
+        else:
+            guild = ctx.guild
+            try:
+                number = warns[guild[member]]
+            except:
+                number = None
+            print(number)
+            if number is None:
+                newdict = "[" + str(guild) + "]\n" + str(member) + "= 1"
+                warns.update(newdict)
+                toml.dump(warns, config.warn_path)
+            else:
+                newdict = "[" + str(guild) + "]\n" + str(member) + "= " + str(number + 1)
+                warns.update(newdict)
+                toml.dump(warns, config.warn_path)
+            print(warns)
 
