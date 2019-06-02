@@ -14,7 +14,7 @@ class CommandErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
+    @commands.Cog.listener('on_command_error')
     async def on_command_error(self, ctx, error):
         """The event triggered when an error is raised while invoking a command.
         ctx   : Context
@@ -44,10 +44,6 @@ class CommandErrorHandler(commands.Cog):
                 pass
 
         if isinstance(error, commands.MissingPermissions):
-            text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
-            await ctx.send(text)
-
-        if isinstance(error, CheckFailure):
             text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
             await ctx.send(text)
 
