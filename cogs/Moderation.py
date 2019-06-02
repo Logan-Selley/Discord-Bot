@@ -118,17 +118,23 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name="prune", aliases=["pr"])
     @has_permissions(manage_messages=True)
-    async def prune(self, ctx, count: int = None):
+    async def prune(self, ctx, count: int = None, member: discord.Member = None):
         """Deletes the last (given number) of messages up to 100
+        pass an @user to delete messages only from given user
         aliases= {pr}"""
-        messages = []
-        print(count)
+
+        def check_user(m):
+            return m.author == member
         if count is None:
             await ctx.send("You need to tell me how many messages to delete!")
             return
         if count > 100:
             count = 100
-        async for x in ctx.channel.audit_logs(limit=count):
-            messages.append(x)
-        await self.bot.delete_messages(messages)
-        await ctx.send("Deleted the last " + str(count) + " messages!")
+        if member is None:
+            await ctx.channel.purge(limit=count)
+            await ctx.send("Deleted the last " + str(count) + " messages!")
+        else:
+            await ctx.channel.purge(limit=count, check=check_user)
+            await ctx.send("Deleted the last " + str(count) + " messages by " + str(member) + "!")
+
+
