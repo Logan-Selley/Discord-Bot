@@ -3,10 +3,8 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions, CheckFailure
 import asyncio
 import config
-import toml
-import logging
-import os
 import json
+import logging
 
 cfg = config.load_config()
 
@@ -46,6 +44,7 @@ class Moderation(commands.Cog):
         await member.send(message)
         await ctx.guild.kick(member)
         await ctx.channel.send(f"{member} was kicked!")
+        logging.warning(f"{member} was kicked!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="ban", aliases=[])
@@ -71,6 +70,7 @@ class Moderation(commands.Cog):
         await member.send(message)
         await ctx.guild.kick(member)
         await ctx.channel.send(f"{member} was banned!")
+        logging.warning(f"{member} was banned!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="mute", aliases=[])
@@ -96,6 +96,7 @@ class Moderation(commands.Cog):
         await member.send(message)
         await ctx.guild.mute(member)
         await ctx.channel.send(f"{member} was muted!")
+        logging.warning(f"{member} was muted!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="deafen", aliases=[])
@@ -121,6 +122,7 @@ class Moderation(commands.Cog):
         await member.send(message)
         await ctx.guild.mute(member)
         await ctx.channel.send(f"{member} was deafened!")
+        logging.warning(f"{member} was deafened!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="prune", aliases=["pr"])
@@ -143,6 +145,7 @@ class Moderation(commands.Cog):
         else:
             await ctx.channel.purge(limit=count, check=check_user)
             await ctx.send("Deleted the last " + str(count) + " messages by " + str(member) + "!")
+        logging.info(str(count) + " messages pruned by " + str(member))
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="warn", aliases=[])
@@ -177,6 +180,7 @@ class Moderation(commands.Cog):
         with open('warnings.json', 'w+') as f:
             json.dump(report, f)
         await ctx.send(str(user) + " has been warned for: " + reason)
+        logging.warning(f"{user} was warned!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="warnings", aliases=[])
