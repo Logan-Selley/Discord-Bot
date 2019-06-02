@@ -6,6 +6,7 @@ import config
 import toml
 import logging
 import os
+import json
 
 cfg = config.load_config()
 
@@ -144,51 +145,56 @@ class Moderation(commands.Cog):
             await ctx.send("Deleted the last " + str(count) + " messages by " + str(member) + "!")
 
     @commands.guild_only()
-    @commands.command(pass_context=True, name="warn", aliases=[])
-    @has_permissions(ban_members=True)
-    async def warn(self, ctx, member: discord.Member = None):
-        """Gives a warning to the given user and auto bans after a certain amount of warnings definied in the config
-        aliases= {}"""
-
-        warns = config.load_warns()
-
-        if member is None:
-            await ctx.send("You didn't give me anyone to warn!")
+    @commands.command(pass_context=True)
+    @has_permissions(manage_roles=True, ban_members=True)
+    async def warn(self, ctx, user: discord.User, *reason: str):
+        report = config.load_warns()
+        if not reason:
+            await ctx.send("Please provide a reason")
             return
+        reason = ' '.join(reason)
+        for guild in report['guilds']:
+            if guild['id'] == ctx.guild.id:
+                this_guild = report['guilds'].index(guild)
+                break
         else:
-            guild = ctx.guild
-            try:
-                number = warns[guild[member]]
-            except:
-                number = None
-            print(number)
-            if number is None:
-                newdict = "[" + str(guild) + "]\n" + str(member) + "= 1"
-                warns.update(newdict)
-                toml.dump(warns, config.warn_path)
-            else:
-                newdict = "[" + str(guild) + "]\n" + str(member) + "= " + str(number + 1)
-                warns.update(newdict)
-                toml.dump(warns, config.warn_path)
-            print(warns)
+            report['guilds'].append({
+                'id': ctx.guild.id,
+                'users': []
+            })
+            this_guild = len(report['guilds']) - 1
+        for current_user in report['guilds'][this_guild]['users']:
+            if current_user['name'] == user.name:
+                current_user['reasons'].append(reason)
+                break
+        else:
+            report['guilds'][this_guild]['users'].append({
+                'name': user.name,
+                'reasons': [reason, ]
+            })
+        with open('warnings.json', 'w+') as f:
+            json.dump(report, f)
+        await ctx.send(str(user) + " has been warned for: " + reason)
 
     @commands.guild_only()
-    @commands.command(pasS_context=True, name="getwarns", aliases=[])
-    async def get_warns(self, ctx, member: discord.Member = None):
-        """Returns the number of warns the given user has
-        aliases= {}"""
-        warns = config.load_warns()
-
-        if member is None:
-            await ctx.send("You didn't give me anyone to check!")
+    @commands.command(pass_context=True)
+    async def warnings(self, ctx, user: discord.User = None):
+        if user is None:
+            await ctx.send("you have to give me a user to get their warnings!")
             return
-        try:
-            number = warns[ctx.guild[member]]
-        except:
-            number = None
-
-        if number is None:
-            await ctx.send(str(member) + " has zero warns")
+        report = config.load_warns()
+        for guild in report['guilds']:
+            if guild['id'] == ctx.guild.id:
+                this_guild = report['guilds'].index(guild)
+                break
         else:
-            await ctx.send(str(member) + " has " + str(number) + " warns!")
+            await ctx.send(f"{user.name} has never been reported")
+            return
+        for current_user in report['guilds'][this_guild]['users']:
+            if user.name == current_user['name']:
+                await ctx.send(f"{user.name} has been reported {len(current_user['reasons'])} times : "
+                              f"{','.join(current_user['reasons'])}")
+                break
+        else:
+            await ctx.send(f"{user.name} has never been reported")
 

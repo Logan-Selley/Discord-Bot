@@ -1,6 +1,7 @@
 import toml
 import logging
 import os
+import json
 
 EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 \"prefix\"=\"!\" # prefix used to denote commands
@@ -16,7 +17,7 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 # Moderation settings
 "warns_till_ban"=3
 """
-warn_path = "./warnings.toml"
+warn_path = "./warnings.json"
 config_path = "./config.toml"
 
 
@@ -37,9 +38,9 @@ def load_config(path=config_path):
 def load_warns(path=warn_path):
     """Loads or creates warning file from path"""
     if os.path.exists(path) and os.path.isfile(path):
-        warns = toml.load(path)
-        return warns
+        with open(path, encoding='utf-8') as f:
+            warnings = json.load(f)
     else:
-        with open(path, "w") as warns:
-            logging.warning(f"No warning file found. Creating an empty warning file at {path}")
-            return load_warns(path=path)
+        warnings = {}
+        warnings['guilds'] = []
+    return warnings
