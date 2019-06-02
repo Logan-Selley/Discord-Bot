@@ -34,7 +34,6 @@ class Moderation(commands.Cog):
             return
         if reason is None:
             reason = "For being a jerk!"
-        print(reason)
         message = f"You have been kicked from {ctx.guild.name} for {reason}"
         await member.send(message)
         await ctx.guild.kick(member)
@@ -43,7 +42,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name="ban", aliases=[])
     @has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member = None, reason=None):
+    async def ban(self, ctx, member: discord.Member = None, *, reason=None):
         """Bans the given member for the given reason
         aliases= {}"""
         if member is None:
@@ -68,7 +67,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name="mute", aliases=[])
     @has_permissions(mute_members=True)
-    async def mute(self, ctx, member: discord.Member = None, reason=None):
+    async def mute(self, ctx, member: discord.Member = None, *, reason=None):
         """Mutes the given member for the reason given
         aliases= {}"""
         if member is None:
@@ -93,7 +92,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name="deafen", aliases=[])
     @has_permissions(mute_members=True)
-    async def deafen(self, ctx, member: discord.Member = None, reason=None):
+    async def deafen(self, ctx, member: discord.Member = None, *, reason=None):
         """Deafens the given member for the reason given
         aliases= {}"""
         if member is None:
