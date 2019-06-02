@@ -172,3 +172,23 @@ class Moderation(commands.Cog):
                 toml.dump(warns, config.warn_path)
             print(warns)
 
+    @commands.guild_only()
+    @commands.command(pasS_context=True, name="getwarns", aliases=[])
+    async def get_warns(self, ctx, member: discord.Member = None):
+        """Returns the number of warns the given user has
+        aliases= {}"""
+        warns = config.load_warns()
+
+        if member is None:
+            await ctx.send("You didn't give me anyone to check!")
+            return
+        try:
+            number = warns[ctx.guild[member]]
+        except:
+            number = None
+
+        if number is None:
+            await ctx.send(str(member) + " has zero warns")
+        else:
+            await ctx.send(str(member) + " has " + str(number) + " warns!")
+
