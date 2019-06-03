@@ -81,10 +81,22 @@ class General(commands.Cog):
         except:
             pass
 
-    @commands.command(pass_context=True, name='coin', aliases='coinflip')
+    @commands.command(pass_context=True, name='coin', aliases=['coinflip', 'flip'])
     async def coin(self, ctx)
+        """Has the bot flip a coin!
+        aliases= {coinflip, flip}"""
         flip = random.randint(1, 2)
         if flip == 1:
             await ctx.send("You flipped heads!")
         else:
             await ctx.send("You flipped tails!")
+
+    @commands.command(pass_context=True, name='roll', aliases=['diceroll', 'dice'])
+    async def roll(self, ctx, sides: int = None):
+        """Has the bot roll a dice with the given number of sides
+        aliases= {diceroll, dice}"""
+        if sides is None:
+            await ctx.send("You have to tell me how many sides the die has!")
+            return
+        roll = random.randint(1, sides)
+        await ctx.send("You rolled: " + str(roll))
