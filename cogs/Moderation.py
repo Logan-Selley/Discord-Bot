@@ -185,7 +185,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.command(pass_context=True, name="warnings", aliases=[])
     async def warnings(self, ctx, user: discord.User = None):
-        """function to retrieve the warnings of the given user
+        """Function to retrieve the warnings of the given user
         aliases= {}"""
         if user is None:
             await ctx.send("you have to give me a user to get their warnings!")
@@ -206,3 +206,29 @@ class Moderation(commands.Cog):
         else:
             await ctx.send(f"{user.name} has never been warned")
 
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="remove_warns", aliases=[])
+    @has_permissions(manage_roles=True, ban_members=True)
+    async def remove_warns(self, ctx, user: discord.User = None):
+        """Function to remove all of a user's warns
+        aliases= {}"""
+        if user is None:
+            await ctx.send("you have to give me a user to remove their warnings!")
+            return
+        report = config.load_warns()
+        for guild in report['guilds']:
+            if guild['id'] == ctx.guild.id:
+                this_guild = report['guilds'].index(guild)
+                break
+        else:
+            await ctx.send(f"{user.name} has never been warned")
+            return
+        for current_user in report['guilds'][this_guild]['users']:
+            if user.name == current_user['name']:
+                current_user['reasons'] = []
+                await ctx.send(f"{user.name} has had all warnings removed")
+                with open('warnings.json', 'w+') as f:
+                    json.dump(report, f)
+                break
+        else:
+            await ctx.send(f"{user.name} has never been warned")

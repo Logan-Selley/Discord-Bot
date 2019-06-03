@@ -35,6 +35,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
         removeusersongs                     !rus remove songs requested by given user (works with nicknames)  COMPLETE
         playlist                            !pl add playlist (yt or spotify) to queue   COMPLETE
         
+        implement vote skip
         
         
         testing notes
