@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import config
+import random
 
 cfg = config.load_config()
 
@@ -79,3 +80,11 @@ class General(commands.Cog):
                     await ctx.message.author.send('', embed=halp)
         except:
             pass
+
+    @commands.command(pass_context=True, name='coin', aliases='coinflip')
+    async def coin(self, ctx)
+        flip = random.randint(1, 2)
+        if flip == 1:
+            await ctx.send("You flipped heads!")
+        else:
+            await ctx.send("You flipped tails!")
