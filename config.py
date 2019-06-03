@@ -19,6 +19,7 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 """
 warn_path = "./warnings.json"
 config_path = "./config.toml"
+temp_punish = "./punish.json"
 
 
 def load_config(path=config_path):
@@ -44,3 +45,15 @@ def load_warns(path=warn_path):
         warnings = {}
         warnings['guilds'] = []
     return warnings
+
+
+def load_punish(path=temp_punish):
+    """Loads or creates temp punishment file from path"""
+    if os.path.exists(path) and os.path.isfile(path):
+        with open(path, encoding='utf-8') as f:
+            punishments = json.load(f)
+    else:
+        punishments = {}
+        punishments['guilds'] = []
+    return punishments
+

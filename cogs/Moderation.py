@@ -68,7 +68,7 @@ class Moderation(commands.Cog):
             reason = "For being a jerk!"
         message = f"You have been banned from {ctx.guild.name} for {reason}"
         await member.send(message)
-        await ctx.guild.kick(member)
+        await ctx.guild.ban(member)
         await ctx.channel.send(f"{member} was banned!")
         logging.warning(f"{member} was banned!")
 
@@ -229,6 +229,34 @@ class Moderation(commands.Cog):
                 await ctx.send(f"{user.name} has had all warnings removed")
                 with open('warnings.json', 'w+') as f:
                     json.dump(report, f)
+                logging.warning(str(user) + " had all warnings removed!")
                 break
         else:
             await ctx.send(f"{user.name} has never been warned")
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="soft_ban", aliases=[])
+    @has_permissions(ban_members=True)
+    async def soft_ban(self, ctx, member: discord.Member = None, *, reason=None):
+        """Bans the given member for the given reason
+        aliases= {}"""
+        if member is None:
+            await ctx.send("You need to give me someone to soft ban")
+            return
+        elif member == ctx.message.author:
+            await ctx.send("You cannot soft ban yourself")
+            return
+        elif member == ctx.guild.owner:
+            await ctx.send("You can't soft ban my boss!")
+            return
+        elif member == self.bot.user:
+            await ctx.send("Rude!")
+            return
+        if reason is None:
+            reason = "For being a jerk!"
+        message = f"You have been soft banned from {ctx.guild.name} for {reason}"
+        await member.send(message)
+        await ctx.guild.ban(member)
+        await ctx.guild.unban(member)
+        await ctx.channel.send(f"{member} was soft banned!")
+        logging.warning(f"{member} was soft banned!")
