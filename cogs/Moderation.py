@@ -184,6 +184,7 @@ class Moderation(commands.Cog):
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="warnings", aliases=[])
+    @has_permissions(manage_roles=True, ban_members=True)
     async def warnings(self, ctx, user: discord.User = None):
         """Function to retrieve the warnings of the given user
         aliases= {}"""

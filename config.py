@@ -14,8 +14,13 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 # Spotify API keys:
 \"spotify_client\"=\"\"
 \"spotify_secret\"=\"\"
+[APIs]
+# Other APIs
+"forcastio"=""
+[Moderation]
 # Moderation settings
-"warns_till_ban"=3
+"warns_till_kick"=3
+"warns_till_ban"=5
 """
 warn_path = "./warnings.json"
 config_path = "./config.toml"

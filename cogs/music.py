@@ -7,6 +7,7 @@ import logging
 from discord.ext import commands
 from video import Video
 import config
+import utils
 from lyrics_extractor import Song_Lyrics
 from urlvalidator import validate_url, ValidationError
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -150,32 +151,13 @@ class Music(commands.Cog):
         if len(args) == 0:
             await ctx.send("you're missing parameters!")
             raise commands.CommandError("Missing arguments")
-        url = self.argument_concat(args)
+        url = utils.argument_concat(args)
         await self._play(ctx, url, False)
-
-    @staticmethod
-    def argument_concat(args):
-        url = ""
-        if len(args) > 1:
-            for term in args:
-                url += term + " "
-        else:
-            url = args[0]
-
-        return url
-
-    @staticmethod
-    def url_validation(url):
-        try:
-            validate_url(url)
-            return True
-        except ValidationError:
-            return False
 
     async def _play(self, ctx, url, playlist):
         voice = ctx.voice_client
         state = self.get_state(ctx.guild)
-        if self.url_validation(url):
+        if utils.url_validation(url):
             search_type = "url"
         else:
             search_type = "search"
@@ -444,8 +426,8 @@ class Music(commands.Cog):
                 await ctx.send("Nothing is playing currently, add a song title to the command to search")
                 return
         else:  # search lyrics
-            song = self.argument_concat(args)
-            if self.url_validation(song):
+            song = utils.argument_concat(args)
+            if utils.url_validation(song):
                 await ctx.send("This doesn't take urls fam, just enter the title of the song")
                 return
             title, lyrics = extract.get_lyrics(song)
@@ -593,8 +575,8 @@ class Music(commands.Cog):
             await ctx.send("No url given")
         else:
             pid = None
-            url = self.argument_concat(args)
-            if not self.url_validation(url):
+            url = utils.argument_concat(args)
+            if not utils.url_validation(url):
                 await ctx.send("invalid url")
                 return
             if "spotify" in url:

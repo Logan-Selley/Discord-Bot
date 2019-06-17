@@ -82,7 +82,7 @@ class General(commands.Cog):
             pass
 
     @commands.command(pass_context=True, name='coin', aliases=['coinflip', 'flip'])
-    async def coin(self, ctx)
+    async def coin(self, ctx):
         """Has the bot flip a coin!
         aliases= {coinflip, flip}"""
         flip = random.randint(1, 2)
