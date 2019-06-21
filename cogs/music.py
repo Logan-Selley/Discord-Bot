@@ -214,7 +214,7 @@ class Music(commands.Cog):
                 source = self._get_source(song, state)
         logging.info(f"Now Playing '{song.title}'")
 
-        def after_playing():
+        def after_playing(*args):
             if state.looping == "song":
                 state.playlist.insert(0, song)
             elif state.looping == "queue":
@@ -225,14 +225,13 @@ class Music(commands.Cog):
                 self._play_song(voice, state, next_song, None)
             else:
                 state.now_playing = None
-
         voice.play(source, after=after_playing)
 
     @staticmethod
     def _get_source(song, state):
         source = discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio(source=song.stream_url, before_options='-reconnect 1 -reconnect_streamed 1 '
-                                                                          '-reconnect_delay_max 5'),
+                                                                          '-reconnect_delay_max 4'),
             volume=state.volume
         )
         return source
@@ -279,7 +278,7 @@ class Music(commands.Cog):
         ctx.voice_client.resume()
 
     @commands.guild_only()
-    @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
         """Displays the queue of tracks to be played
@@ -290,28 +289,33 @@ class Music(commands.Cog):
     async def _send_queue(self, ctx, queue):
         messages = self._queue_text(queue)
         for string in messages:
-            await ctx.send(string)
+            await ctx.send('', embed=string)
 
     @staticmethod
     def _queue_text(queue):
         messages = []
         if len(queue) > 0:
-            start = str(len(queue)) + " songs in queue:"
-            message = start
+            message = discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue:")
+            field_limit = 25
+            current_field = 1
             for (index, song) in enumerate(queue):
-                add = "\n" + str(index+1) + ". " + song.title + " (requested by " + song.requested_by.display_name + ")"
-                if (len(add) + len(message)) >= 2000:
-                    logging.info("max message sized reached, starting new message")
-                    messages.append(message)
-                    message = ""
-                    message += add
+                if current_field <= field_limit:
+                    message.add_field(name=str(index+1) + ": ",
+                                      value=song.title + " (requested by " + song.requested_by.display_name + ")",
+                                      inline=False)
+                    current_field += 1
                 else:
-
-                    message += add
+                    messages.append(message)
+                    message = discord.Embed(title='Current Queue continued',
+                                            description=str(len(queue)) + " songs in queue:")
+                    message.add_field(name=str(index + 1) + ": ",
+                                      value=song.title + " (requested by " + song.requested_by.display_name + ")",
+                                      inline=False)
+                    current_field = 2
             messages.append(message)
             return messages
         else:
-            messages.append("the queue is empty")
+            messages.append(discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue:"))
             return messages
 
     @commands.guild_only()

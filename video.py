@@ -1,12 +1,20 @@
 import youtube_dl as ytdl
 import discord
+import config
+
+cfg = config.load_config()
+
+config = cfg['music'.split(".")[-1]]
 
 
 YTDL_OPTS = {
     "default_search": "auto",
     "format": "bestaudio/best",
     "quiet": True,
+    "verbose": False,
     "extract_flat": "in_playlist",
+    "rm-cache-dir": True,
+    "no-cache-dir": True
 }
 
 
