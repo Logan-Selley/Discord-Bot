@@ -27,17 +27,22 @@ class APIs(commands.Cog):
         self.config = cfg[__name__.split(".")[-1]]
 
     @commands.command(pass_context=True, name="weather", aliases=["w"])
-    async def weather(self, *location):
+    async def weather(self, ctx, *location: str, type=None):
         """Uses the Dark Sky API to get weather data for the given location, coordinates are accessed using geopy
         aliases= {w}"""
         key = self.config["forcastio"]
+        if len(location) == 0:
+            await ctx.send("You need to give me a location!")
+            raise commands.MissingRequiredArgument
         local = argument_concat(location)
-        print(local)
-        await asyncio.sleep(1)
         geolocator = geopy.Nominatim(user_agent="Very Sad Intern")
         loc = geolocator.geocode(local)
-        print(loc)
+        if loc is None:
+            await ctx.send("I couldn't get a geocode for that location!")
+            return
         lat = loc.latitude
         long = loc.longitude
         forecast = forecastio.load_forecast(key, lat, long)
-        print(forecast)
+        weather = forecast.json['currently']
+        await ctx.send(loc.address + ": " + weather['summary'] + " at " + str(weather['temperature'])
+                       + " degrees fahrenheit")
