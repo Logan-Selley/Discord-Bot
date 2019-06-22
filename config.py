@@ -5,6 +5,8 @@ import json
 
 EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 \"prefix\"=\"!\" # prefix used to denote commands
+"welcome"="Welcome to the server!"
+"goodbye"="You will be missed!"
 [music]
 # Options for the music commands
 "max_volume"=250 # Max audio volume. Set to -1 for unlimited.
@@ -27,6 +29,7 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 warn_path = "./warnings.json"
 config_path = "./config.toml"
 temp_punish = "./punish.json"
+xp_path = "./experience.json"
 
 
 def load_config(path=config_path):
@@ -63,4 +66,15 @@ def load_punish(path=temp_punish):
         punishments = {}
         punishments['guilds'] = []
     return punishments
+
+
+def load_xp(path=xp_path):
+    """Loads or creates temp punishment file from path"""
+    if os.path.exists(path) and os.path.isfile(path):
+        with open(path, encoding='utf-8') as f:
+            exp = json.load(f)
+    else:
+        exp = {}
+        exp['guilds'] = []
+    return exp
 
