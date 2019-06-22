@@ -8,6 +8,7 @@ import config
 import asyncio
 import time
 import random
+import json
 
 cfg = config.load_config()
 
@@ -56,10 +57,10 @@ async def on_member_remove(member):
 @bot.event
 async def on_message(message):
     xp = config.load_xp
-
+    print(xp)
     if message.author.bot:
         return
-    if message.channel.is_private:
+    if message.guild is None:
         return
     else:
         guild = message.guild
@@ -73,4 +74,30 @@ async def on_message(message):
             guild_xp[user]["xp"] = 0
             guild_xp[user]["level"] = 0
             guild_xp[user]["last_message"] = 0
+        xp = random.randint(5, 10)
+        await add_xp(guild_xp[user], xp)
+        await level_up(guild_xp[user], message.channel, message.author.display_name)
 
+        with open("./experience.json", "w") as f:
+            json.dump(xp, f)
+        print("xp updated")
+
+
+async def add_xp(user, xp):
+    if time.time() - user["last_message"] > 30:
+        user["xp"] += xp
+        user["last_message"] = time.time()
+    else:
+        return
+
+
+async def level_up(user, channel, display):
+    xp = user["xp"]
+    lvl_start = user["level"]
+    lvl_end = int(xp ** (1/4))
+
+    if lvl_start < lvl_end:
+        await channel.send(display + " leveled up to lvl " + str(lvl_end) + "!")
+
+    print(lvl_end)
+    print(lvl_start)
