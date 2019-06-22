@@ -75,6 +75,6 @@ def load_xp(path=xp_path):
             exp = json.load(f)
     else:
         exp = {}
-        exp['guilds'] = []
+        exp['guilds'] = {}
     return exp
 
