@@ -14,11 +14,11 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 # Spotify API keys:
 \"spotify_client\"=\"\"
 \"spotify_secret\"=\"\"
-"yt_user"=None
-"yt_pass"=None
 [APIs]
 # Other APIs
 "forcastio"=""
+"bitly_id"=""
+"bitly_secret"=""
 [Moderation]
 # Moderation settings
 "warns_till_kick"=3

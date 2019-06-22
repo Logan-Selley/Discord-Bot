@@ -69,7 +69,7 @@ async def in_voice(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
-        await ctx.send("You need to be in the channel to do that")
+        await ctx.send("You need to be in the same channel as me for that!")
         raise commands.CommandError("You aren't in the same channel as me")
 
 

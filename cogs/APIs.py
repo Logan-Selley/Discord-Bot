@@ -1,14 +1,13 @@
 from discord.ext import commands
 import config
 import strawpoll
-import pybitly
 import giphy_client
 import soundcloud
 import praw
 import meetup
 import pyimgur
 import forecastio
-from utils import argument_concat
+from utils import argument_concat, url_validation
 import geopy
 import asyncio
 
@@ -46,3 +45,4 @@ class APIs(commands.Cog):
         weather = forecast.json['currently']
         await ctx.send(loc.address + ": " + weather['summary'] + " at " + str(weather['temperature'])
                        + " degrees fahrenheit")
+
