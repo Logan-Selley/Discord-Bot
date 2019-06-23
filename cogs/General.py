@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import config
 import random
+import collections
+import operator
 
 cfg = config.load_config()
 
@@ -127,4 +129,23 @@ class General(commands.Cog):
     async def leaderboard(self, ctx):
         """Display the top users for the current server
         aliases= {lb}"""
-        print("incomplete")
+        guild = ctx.guild.id
+        xp = config.load_xp()
+        scores = {}
+        if str(guild) in xp['guilds']:
+            for user in xp['guilds'][str(guild)]:
+                scores.update({ctx.guild.get_member(int(user)).display_name: xp['guilds'][str(guild)][user]['xp']})
+        sorted_scores = collections.OrderedDict(sorted(sorted(scores.items(), key=operator.itemgetter(1),
+                                                              reverse=True)))
+        message = discord.Embed(title='Leaderboard', description="This server's most active users")
+        current_field = 1
+        field_limit = 25
+        for index, (key, value) in enumerate(sorted_scores.items()):
+            if current_field <= field_limit:
+                message.add_field(name=str(index+1) + ": " + key,
+                                  value="with :" + str(value) + " xp",
+                                  inline=False)
+                current_field += 1
+            else:
+                break
+        await ctx.send('', embed=message)
