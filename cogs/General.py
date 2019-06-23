@@ -103,11 +103,10 @@ class General(commands.Cog):
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='level', aliases=['lvl'])
-    async def level(self, ctx, user: discord.user = None):
+    async def level(self, ctx, user: discord.User = None):
         """Display a user's progress to the next level or display the progress of the given user
         aliases= {lvl}"""
         guild = ctx.guild.id
-        print(user)
         if user is None:
             id = ctx.author.id
             name = ctx.author.display_name
@@ -118,14 +117,9 @@ class General(commands.Cog):
         exp = 0
         level = 0
         if str(guild) in xp['guilds']:
-            print("pass guild")
             if str(id) in xp['guilds'][str(guild)]:
-                print("pass user")
                 exp = xp['guilds'][str(guild)][str(id)]['xp']
                 level = xp['guilds'][str(guild)][str(id)]['level']
-        print(exp)
-        print(level)
-        print(None)
         await ctx.send(name + " is currently level: " + str(level) + " with " + str(exp) + " experience!")
 
     @commands.guild_only()
