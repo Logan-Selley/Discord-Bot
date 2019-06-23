@@ -57,52 +57,42 @@ async def on_member_remove(member):
 @bot.event
 async def on_message(message):
     xp = config.load_xp()
-    print(xp)
     if message.author.bot:
         return
     if message.guild is None:
         return
     else:
         guild = message.guild
-        guilds = xp["guilds"]
-        if guild.id not in guilds:
-            guilds[guild.id] = {}
-        guild_xp = guilds[guild.id]
+        if str(guild.id) not in xp['guilds']:
+            xp['guilds'][str(guild.id)] = {}
         user = message.author.id
-        if user not in guild_xp:
-            guild_xp[user] = {
+        if str(user) not in xp['guilds'][str(guild.id)]:
+            xp['guilds'][str(guild.id)][str(user)] = {
                 'xp': 0,
                 'level': 0,
                 'last_message': 0
             }
         exp = random.randint(5, 10)
-        print("added xp " + str(exp))
-        await add_xp(guild_xp[user], exp)
-        await level_up(guild_xp[user], message.channel, message.author.display_name)
+        await add_xp(xp['guilds'][str(guild.id)][str(user)], exp)
+        await level_up(xp['guilds'][str(guild.id)][str(user)], message.channel, message.author.display_name)
 
         with open("./experience.json", "w") as f:
             json.dump(xp, f)
-        print("xp updated")
-        print(xp)
 
 
 async def add_xp(user, xp):
-    if time.time() - user["last_message"] > 30:
+     if time.time() - user["last_message"] > 30:
         user["xp"] += xp
         user["last_message"] = time.time()
-    else:
+      else:
         return
 
 
 async def level_up(user, channel, display):
     xp = user["xp"]
-    print(xp)
     lvl_start = user["level"]
     lvl_end = int(xp ** (1/4))
 
     if lvl_start < lvl_end:
         await channel.send(display + " leveled up to lvl " + str(lvl_end) + "!")
         user["level"] = lvl_end
-    print(lvl_end)
-    print(lvl_start)
-    print(user["level"])
