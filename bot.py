@@ -78,13 +78,14 @@ async def on_message(message):
 
         with open("./experience.json", "w") as f:
             json.dump(xp, f)
+    await bot.process_commands(message)
 
 
 async def add_xp(user, xp):
-     if time.time() - user["last_message"] > 30:
+    if time.time() - user["last_message"] > 30:
         user["xp"] += xp
         user["last_message"] = time.time()
-      else:
+    else:
         return
 
 
