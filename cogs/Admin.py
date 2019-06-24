@@ -44,3 +44,5 @@ class Admin(commands.Cog):
         else:
             settings['guilds'][str(guild)]['leveling'] = True
             await ctx.send("leveling enabled!")
+        with open("./settings.json", "w") as f:
+            json.dump(settings, f)
