@@ -38,10 +38,12 @@ class Admin(commands.Cog):
         aliases={tl}"""
         settings = config.load_settings()
         guild = ctx.guild.id
-        if settings['guilds'][str(guild)]['leveling'] is True:
+        if settings['guilds'][str(guild)]['leveling'] == True:
+            print("is true")
             settings['guilds'][str(guild)]['leveling'] = False
             await ctx.send("leveling disabled!")
         else:
+            print("is false")
             settings['guilds'][str(guild)]['leveling'] = True
             await ctx.send("leveling enabled!")
         with open("./settings.json", "w") as f:

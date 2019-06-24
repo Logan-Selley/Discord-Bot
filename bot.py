@@ -81,9 +81,7 @@ async def on_message(message):
 
             with open("./experience.json", "w") as f:
                 json.dump(xp, f)
-        await bot.process_commands(message)
-    else:
-        logging.info("leveling disabled")
+    await bot.process_commands(message)
 
 
 @bot.event
