@@ -16,8 +16,11 @@ setting = config.load_settings()
 
 
 def prefix(bot, message):
-    id = message.guild.id
-    return setting['guilds'][str(id)]['prefix']
+    try:
+        id = message.guild.id
+        return setting['guilds'][str(id)]['prefix']
+    except:
+        return "!"
 
 
 bot = commands.Bot(command_prefix=prefix, case_insensitive=True)
@@ -67,14 +70,10 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_message(message):
-    settings = config.load_settings()
-    if settings['guilds'][str(message.guild.id)]["leveling"] is True:
-        xp = config.load_xp()
-        if message.author.bot:
-            return
-        if message.guild is None:
-            return
-        else:
+    if not message.author.bot and message.guild is not None:
+        settings = config.load_settings()
+        if settings['guilds'][str(message.guild.id)]["leveling"] is True:
+            xp = config.load_xp()
             guild = message.guild
             if str(guild.id) not in xp['guilds']:
                 xp['guilds'][str(guild.id)] = {}
