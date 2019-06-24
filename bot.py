@@ -17,7 +17,7 @@ bot = commands.Bot(command_prefix=cfg["prefix"], case_insensitive=True)
 bot.remove_command('help')
 
 
-COGS = ['cogs.music', 'cogs.ErrorHandler', 'cogs.General', 'cogs.Moderation', 'cogs.APIs']
+COGS = ['cogs.music', 'cogs.ErrorHandler', 'cogs.General', 'cogs.Moderation', 'cogs.APIs', 'cogs.Admin']
 
 
 def add_cogs(bot):
@@ -57,29 +57,33 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_message(message):
-    xp = config.load_xp()
-    if message.author.bot:
-        return
-    if message.guild is None:
-        return
-    else:
-        guild = message.guild
-        if str(guild.id) not in xp['guilds']:
-            xp['guilds'][str(guild.id)] = {}
-        user = message.author.id
-        if str(user) not in xp['guilds'][str(guild.id)]:
-            xp['guilds'][str(guild.id)][str(user)] = {
-                'xp': 0,
-                'level': 0,
-                'last_message': 0
-            }
-        exp = random.randint(5, 10)
-        await add_xp(xp['guilds'][str(guild.id)][str(user)], exp)
-        await level_up(xp['guilds'][str(guild.id)][str(user)], message.channel, message.author.display_name)
+    settings = config.load_settings()
+    if settings['guilds'][str(message.guild.id)]["leveling"] is True:
+        xp = config.load_xp()
+        if message.author.bot:
+            return
+        if message.guild is None:
+            return
+        else:
+            guild = message.guild
+            if str(guild.id) not in xp['guilds']:
+                xp['guilds'][str(guild.id)] = {}
+            user = message.author.id
+            if str(user) not in xp['guilds'][str(guild.id)]:
+                xp['guilds'][str(guild.id)][str(user)] = {
+                    'xp': 0,
+                    'level': 0,
+                    'last_message': 0
+                }
+            exp = random.randint(5, 10)
+            await add_xp(xp['guilds'][str(guild.id)][str(user)], exp)
+            await level_up(xp['guilds'][str(guild.id)][str(user)], message.channel, message.author.display_name)
 
-        with open("./experience.json", "w") as f:
-            json.dump(xp, f)
-    await bot.process_commands(message)
+            with open("./experience.json", "w") as f:
+                json.dump(xp, f)
+        await bot.process_commands(message)
+    else:
+        logging.info("leveling disabled")
 
 
 @bot.event

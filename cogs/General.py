@@ -38,7 +38,7 @@ class General(commands.Cog):
     '''Written by Jared Newsom(AKA Jared M.F.)!'''
 
     @commands.command()
-    @commands.has_permissions(add_reactions=True, embed_links=True)
+    @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     async def help(self, ctx, *cog):
         """Gets all cogs and commands of mine."""
         try:
