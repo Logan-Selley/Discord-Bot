@@ -12,10 +12,11 @@ class Admin(commands.Cog):
     """Cog for Admin tools and settings"""
 
     @commands.guild_only()
-    @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     @commands.command(pass_context=True, name="reset_settings", aliases=["rs"])
     async def reset_settings(self, ctx):
-        """Resets the server's settings to the default values"""
+        """Resets the server's settings to the default values
+        aliases={rs}"""
         settings = config.load_settings()
         settings['guilds'][str(ctx.guild.id)] = {
             "leveling": True,
@@ -28,3 +29,18 @@ class Admin(commands.Cog):
         with open("./settings.json", "w") as f:
             json.dump(settings, f)
         await ctx.send("Settings have been reset to default!")
+
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(pass_context=True, name="toggle_levels", aliases=["tl"])
+    async def toggle_levels(self, ctx):
+        """Toggles whether the server keeps track of user levels
+        aliases={tl}"""
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        if settings['guilds'][str(guild)]['leveling'] is True:
+            settings['guilds'][str(guild)]['leveling'] = False
+            await ctx.send("leveling disabled!")
+        else:
+            settings['guilds'][str(guild)]['leveling'] = True
+            await ctx.send("leveling enabled!")
