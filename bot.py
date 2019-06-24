@@ -3,6 +3,7 @@ import logging
 import sys
 import discord
 from discord.ext import commands
+from discord.utils import find
 from cogs import music, ErrorHandler, General, Moderation, APIs
 import config
 import asyncio
@@ -79,6 +80,26 @@ async def on_message(message):
         with open("./experience.json", "w") as f:
             json.dump(xp, f)
     await bot.process_commands(message)
+
+
+@bot.event
+async def on_guild_join(guild):
+    """Adds guild to settings file with default settings"""
+    settings = config.load_settings()
+    if str(guild.id) not in settings['guilds']:
+        settings['guilds'][str(guild.id)] = {
+            "leveling": True,
+            "welcome": "Welcome to the server!",
+            "goodbye": "You will be missed!",
+            "warn_kick": 3,
+            "warn_ban": 5,
+            "max_volume": 250
+        }
+    with open("./settings.json", "w") as f:
+        json.dump(settings, f)
+    general = find(lambda x: x.name == 'general', guild.text_channels)
+    if general and general.permissions_for(guild.me).send_messages:
+        await general.send('Hello {}!'.format(guild.name))
 
 
 async def add_xp(user, xp):

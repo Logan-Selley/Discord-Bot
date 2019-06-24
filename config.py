@@ -5,11 +5,7 @@ import json
 
 EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 \"prefix\"=\"!\" # prefix used to denote commands
-"welcome"="Welcome to the server!"
-"goodbye"="You will be missed!"
 [music]
-# Options for the music commands
-"max_volume"=250 # Max audio volume. Set to -1 for unlimited.
 # Lyrics search engine keys:
 "search_key"=""
 "search_id"=""
@@ -21,15 +17,12 @@ EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
 "forcastio"=""
 "bitly_id"=""
 "bitly_secret"=""
-[Moderation]
-# Moderation settings
-"warns_till_kick"=3
-"warns_till_ban"=5
 """
 warn_path = "./warnings.json"
 config_path = "./config.toml"
 temp_punish = "./punish.json"
 xp_path = "./experience.json"
+settings_path = "./settings.json"
 
 
 def load_config(path=config_path):
@@ -77,4 +70,15 @@ def load_xp(path=xp_path):
         exp = {}
         exp['guilds'] = {}
     return exp
+
+
+def load_settings(path=settings_path):
+    """Loads or creates temp punishment file from path"""
+    if os.path.exists(path) and os.path.isfile(path):
+        with open(path, encoding='utf-8') as f:
+            settings = json.load(f)
+    else:
+        settings = {}
+        settings['guilds'] = {}
+    return settings
 

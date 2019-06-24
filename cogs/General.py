@@ -143,7 +143,7 @@ class General(commands.Cog):
         for index, (key, value) in enumerate(sorted_scores.items()):
             if current_field <= field_limit:
                 message.add_field(name=str(index+1) + ": " + key,
-                                  value="with :" + str(value) + " xp",
+                                  value="with: " + str(value) + " xp",
                                   inline=False)
                 current_field += 1
             else:
