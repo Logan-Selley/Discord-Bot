@@ -4,7 +4,6 @@ import os
 import json
 
 EXAMPLE_CONFIG = """\"token\"=\"\" # the bot's token
-\"prefix\"=\"!\" # prefix used to denote commands
 [music]
 # Lyrics search engine keys:
 "search_key"=""

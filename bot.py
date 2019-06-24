@@ -12,8 +12,15 @@ import random
 import json
 
 cfg = config.load_config()
+setting = config.load_settings()
 
-bot = commands.Bot(command_prefix=cfg["prefix"], case_insensitive=True)
+
+def prefix(bot, message):
+    id = message.guild.id
+    return setting['guilds'][str(id)]['prefix']
+
+
+bot = commands.Bot(command_prefix=prefix, case_insensitive=True)
 bot.remove_command('help')
 
 
@@ -29,6 +36,7 @@ def add_cogs(bot):
 
 def run():
     add_cogs(bot)
+    print(cfg)
     if cfg["token"] == "":
         raise ValueError(
             "No Token provided"
@@ -40,18 +48,20 @@ def run():
 async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
     print('------')
-    await bot.change_presence(activity=discord.Game(cfg["prefix"] + "help for commands"))
+    await bot.change_presence(activity=discord.Game("!help for commands"))
 
 
 @bot.event
 async def on_member_join(member):
-    msg = cfg["welcome"]
+    id = member.guild.id
+    msg = setting['guilds'][str(id)]['welcome']
     await member.send(msg)
 
 
 @bot.event
 async def on_member_remove(member):
-    msg = cfg["goodbye"]
+    id = member.guild.id
+    msg = setting['guilds'][str(id)]['goodbye']
     await member.send(msg)
 
 
@@ -90,6 +100,7 @@ async def on_guild_join(guild):
     settings = config.load_settings()
     if str(guild.id) not in settings['guilds']:
         settings['guilds'][str(guild.id)] = {
+            "prefix": "!",
             "leveling": True,
             "welcome": "Welcome to the server!",
             "goodbye": "You will be missed!",

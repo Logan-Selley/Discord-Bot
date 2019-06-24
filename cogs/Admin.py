@@ -19,6 +19,7 @@ class Admin(commands.Cog):
         aliases={rs}"""
         settings = config.load_settings()
         settings['guilds'][str(ctx.guild.id)] = {
+            "prefix": "!",
             "leveling": True,
             "welcome": "Welcome to the server!",
             "goodbye": "You will be missed!",
@@ -38,7 +39,7 @@ class Admin(commands.Cog):
         aliases={tl}"""
         settings = config.load_settings()
         guild = ctx.guild.id
-        if settings['guilds'][str(guild)]['leveling'] == True:
+        if settings['guilds'][str(guild)]['leveling'] is True:
             print("is true")
             settings['guilds'][str(guild)]['leveling'] = False
             await ctx.send("leveling disabled!")
