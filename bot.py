@@ -55,6 +55,7 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
+    print("welcome")
     id = member.guild.id
     msg = setting['guilds'][str(id)]['welcome']
     await member.send(msg)
@@ -62,6 +63,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
+    print("goodbye")
     id = member.guild.id
     msg = setting['guilds'][str(id)]['goodbye']
     await member.send(msg)
@@ -69,8 +71,12 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_message(message):
+    print(message)
     settings = config.load_settings()
-    prefix = settings['guilds'][str(message.guild.id)]['prefix']
+    try:
+        prefix = settings['guilds'][str(message.guild.id)]['prefix']
+    except:
+        prefix = "!"
     if bot.user.mentioned_in(message) and message.mention_everyone is False:
         await message.channel.send("Hey! This server's prefix is: \"" + prefix + "\" use " + prefix +
                                    "help to learn the other commands!")
@@ -114,8 +120,11 @@ async def on_guild_join(guild):
     with open("./settings.json", "w") as f:
         json.dump(settings, f)
     general = find(lambda x: x.name == 'general', guild.text_channels)
-    if general and general.permissions_for(guild.me).send_messages:
-        await general.send('Hello {}!'.format(guild.name))
+    for c in guild.text_channels:
+        if not c.permissions_for(guild.me).send_messages:
+            continue
+        await c.send('Hello {}! My default prefix is: "!" use !help for other commands!'.format(guild.name))
+        break
 
 
 async def add_xp(user, xp):

@@ -250,8 +250,8 @@ class Music(commands.Cog):
             volume = args[0]
             if volume < 0:
                 volume = 0
-
-            max_vol = self.config["max_volume"]
+            settings = config.load_settings()
+            max_vol = settings['guilds'][str(ctx.guild.id)]['max_volume']
             if max_vol > -1:
                 if volume > max_vol:
                     volume = max_vol
@@ -299,17 +299,18 @@ class Music(commands.Cog):
             field_limit = 25
             current_field = 1
             for (index, song) in enumerate(queue):
+                value = "[" + song.title + " (requested by " + song.requested_by.display_name + \
+                        ")](" + song.video_url + ")"
                 if current_field <= field_limit:
                     message.add_field(name=str(index+1) + ": ",
-                                      value=song.title + " (requested by " + song.requested_by.display_name + ")",
+                                      value=value,
                                       inline=False)
                     current_field += 1
                 else:
                     messages.append(message)
                     message = discord.Embed(title='Current Queue continued',
                                             description=str(len(queue)) + " songs in queue:")
-                    value = "["+song.title + " (requested by " + song.requested_by.display_name +\
-                            ")]("+song.video_url+")"
+
                     print(song.video_url)
                     message.add_field(name=str(index + 1) + ": ",
                                       value=value,
