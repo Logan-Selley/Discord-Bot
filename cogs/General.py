@@ -33,7 +33,9 @@ class General(commands.Cog):
     async def pre(self, ctx):
         """Displays the current command prefix
         Aliases= {prefix}"""
-        await ctx.send('Current prefix: ' + cfg["prefix"])
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        await ctx.send('Current prefix: ' + settings['guilds'][str(guild)]['prefix'])
 
     '''Written by Jared Newsom(AKA Jared M.F.)!'''
 

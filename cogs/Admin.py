@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import config
 import json
+import bot
 
 
 def setup(bot):
@@ -47,3 +48,15 @@ class Admin(commands.Cog):
             await ctx.send("leveling enabled!")
         with open("./settings.json", "w") as f:
             json.dump(settings, f)
+
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(pass_context=True, name="change_prefix", aliases=["cp"])
+    async def change_prefix(self, ctx, prefix="!"):
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        settings['guilds'][str(guild)]['prefix'] = prefix
+        await ctx.send("My prefix for this server has been changed to: " + prefix)
+        with open("./settings.json", "w") as f:
+            json.dump(settings, f)
+        bot.bot.command_prefix = bot.prefix(bot.bot, ctx.message)

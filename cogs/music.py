@@ -308,8 +308,11 @@ class Music(commands.Cog):
                     messages.append(message)
                     message = discord.Embed(title='Current Queue continued',
                                             description=str(len(queue)) + " songs in queue:")
+                    value = "["+song.title + " (requested by " + song.requested_by.display_name +\
+                            ")]("+song.video_url+")"
+                    print(song.video_url)
                     message.add_field(name=str(index + 1) + ": ",
-                                      value=song.title + " (requested by " + song.requested_by.display_name + ")",
+                                      value=value,
                                       inline=False)
                     current_field = 2
             messages.append(message)

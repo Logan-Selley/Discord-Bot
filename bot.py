@@ -17,8 +17,9 @@ setting = config.load_settings()
 
 def prefix(bot, message):
     try:
+        settings = config.load_settings()
         id = message.guild.id
-        return setting['guilds'][str(id)]['prefix']
+        return settings['guilds'][str(id)]['prefix']
     except:
         return "!"
 
