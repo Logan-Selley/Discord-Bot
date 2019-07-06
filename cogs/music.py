@@ -361,7 +361,7 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         random.shuffle(state.playlist)
         await ctx.send("Shuffled!")
-        await ctx.send(self._queue_text(state.playlist))
+        await ctx.send(self._send_queue(ctx, state.playlist))
 
     @commands.guild_only()
     @commands.check(in_voice)
