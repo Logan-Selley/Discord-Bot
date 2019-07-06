@@ -72,7 +72,7 @@ def load_xp(path=xp_path):
 
 
 def load_settings(path=settings_path):
-    """Loads or creates temp punishment file from path"""
+    """Loads or creates settings file from path"""
     if os.path.exists(path) and os.path.isfile(path):
         with open(path, encoding='utf-8') as f:
             settings = json.load(f)

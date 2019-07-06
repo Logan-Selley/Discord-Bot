@@ -108,43 +108,51 @@ class General(commands.Cog):
     async def level(self, ctx, user: discord.User = None):
         """Display a user's progress to the next level or display the progress of the given user
         aliases= {lvl}"""
-        guild = ctx.guild.id
-        if user is None:
-            id = ctx.author.id
-            name = ctx.author.display_name
+        settings = config.load_settings()
+        if settings['guilds'][str(ctx.guild.id)]["leveling"] is True:
+            guild = ctx.guild.id
+            if user is None:
+                id = ctx.author.id
+                name = ctx.author.display_name
+            else:
+                id = user.id
+                name = user.display_name
+            xp = config.load_xp()
+            exp = 0
+            level = 0
+            if str(guild) in xp['guilds']:
+                if str(id) in xp['guilds'][str(guild)]:
+                    exp = xp['guilds'][str(guild)][str(id)]['xp']
+                    level = xp['guilds'][str(guild)][str(id)]['level']
+            await ctx.send(name + " is currently level: " + str(level) + " with " + str(exp) + " experience!")
         else:
-            id = user.id
-            name = user.display_name
-        xp = config.load_xp()
-        exp = 0
-        level = 0
-        if str(guild) in xp['guilds']:
-            if str(id) in xp['guilds'][str(guild)]:
-                exp = xp['guilds'][str(guild)][str(id)]['xp']
-                level = xp['guilds'][str(guild)][str(id)]['level']
-        await ctx.send(name + " is currently level: " + str(level) + " with " + str(exp) + " experience!")
+            await ctx.send("leveling is currently disabled on this server!")
 
     @commands.guild_only()
     @commands.command(pass_context=True, name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx):
         """Display the top users for the current server
         aliases= {lb}"""
-        guild = ctx.guild.id
-        xp = config.load_xp()
-        scores = {}
-        if str(guild) in xp['guilds']:
-            for user in xp['guilds'][str(guild)]:
-                scores.update({ctx.guild.get_member(int(user)).display_name: xp['guilds'][str(guild)][user]['xp']})
-        sorted_scores = collections.OrderedDict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
-        message = discord.Embed(title='Leaderboard', description=ctx.guild.name + "'s most active users")
-        current_field = 1
-        field_limit = 25
-        for index, (key, value) in enumerate(sorted_scores.items()):
-            if current_field <= field_limit:
-                message.add_field(name=str(index+1) + ": " + key,
-                                  value="with: " + str(value) + " xp",
-                                  inline=False)
-                current_field += 1
-            else:
-                break
-        await ctx.send('', embed=message)
+        settings = config.load_settings()
+        if settings['guilds'][str(ctx.guild.id)]["leveling"] is True:
+            guild = ctx.guild.id
+            xp = config.load_xp()
+            scores = {}
+            if str(guild) in xp['guilds']:
+                for user in xp['guilds'][str(guild)]:
+                    scores.update({ctx.guild.get_member(int(user)).display_name: xp['guilds'][str(guild)][user]['xp']})
+            sorted_scores = collections.OrderedDict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+            message = discord.Embed(title='Leaderboard', description=ctx.guild.name + "'s most active users")
+            current_field = 1
+            field_limit = 25
+            for index, (key, value) in enumerate(sorted_scores.items()):
+                if current_field <= field_limit:
+                    message.add_field(name=str(index+1) + ": " + key,
+                                      value="with: " + str(value) + " xp",
+                                      inline=False)
+                    current_field += 1
+                else:
+                    break
+            await ctx.send('', embed=message)
+        else:
+            await ctx.send("leveling is currently disabled on this server!")
