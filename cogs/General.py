@@ -135,10 +135,7 @@ class General(commands.Cog):
         if str(guild) in xp['guilds']:
             for user in xp['guilds'][str(guild)]:
                 scores.update({ctx.guild.get_member(int(user)).display_name: xp['guilds'][str(guild)][user]['xp']})
-        print(scores)
-        print(scores.items())
         sorted_scores = collections.OrderedDict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
-        print(sorted_scores)
         message = discord.Embed(title='Leaderboard', description=ctx.guild.name + "'s most active users")
         current_field = 1
         field_limit = 25
