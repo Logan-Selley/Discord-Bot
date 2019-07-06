@@ -39,7 +39,6 @@ def add_cogs(bot):
 
 def run():
     add_cogs(bot)
-    print(cfg)
     if cfg["token"] == "":
         raise ValueError(
             "No Token provided"
