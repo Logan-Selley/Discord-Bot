@@ -281,15 +281,27 @@ class Music(commands.Cog):
     @commands.check(in_voice)
     @commands.command(pass_context=True, name='queue', aliases=['q'])
     async def queue(self, ctx):
-        """Displays the queue of tracks to be played
+        """Displays the queue of tracks to be played up to the first 25
         Aliases= {q}"""
         state = self.get_state(ctx.guild)
         await self._send_queue(ctx, state.playlist)
 
-    async def _send_queue(self, ctx, queue):
+    @commands.guild_only()
+    @commands.check(in_voice)
+    @commands.command(pass_context=True, name="full_queue", aliases=['fq'])
+    async def full_queue(self, ctx):
+        """Displays the queue of tracks to be played
+        Aliases= {fq}"""
+        state = self.get_state(ctx.guild)
+        await self._send_queue(ctx, state.playlist, True)
+
+    async def _send_queue(self, ctx, queue, send_all=False):
         messages = self._queue_text(queue)
-        for string in messages:
-            await ctx.send('', embed=string)
+        if send_all:
+            for string in messages:
+                await ctx.send('', embed=string)
+        else:
+            await ctx.send('', embed=messages[0])
 
     @staticmethod
     def _queue_text(queue):
@@ -361,7 +373,7 @@ class Music(commands.Cog):
         state = self.get_state(ctx.guild)
         random.shuffle(state.playlist)
         await ctx.send("Shuffled!")
-        await ctx.send(self._send_queue(ctx, state.playlist))
+        await self._send_queue(ctx, state.playlist)
 
     @commands.guild_only()
     @commands.check(in_voice)
