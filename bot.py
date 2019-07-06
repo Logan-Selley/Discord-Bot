@@ -46,12 +46,11 @@ def run():
         )
     bot.run(cfg["token"])
 
-
 @bot.event
 async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
     print('------')
-    await bot.change_presence(activity=discord.Game("!help for commands"))
+    await bot.change_presence(activity=discord.Game("@me for this server's prefix!"))
 
 
 @bot.event
@@ -70,8 +69,13 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_message(message):
+    settings = config.load_settings()
+    prefix = settings['guilds'][str(message.guild.id)]['prefix']
+    if bot.user.mentioned_in(message) and message.mention_everyone is False:
+        await message.channel.send("Hey! This server's prefix is: \"" + prefix + "\" use " + prefix +
+                                   "help to learn the other commands!")
+
     if not message.author.bot and message.guild is not None:
-        settings = config.load_settings()
         if settings['guilds'][str(message.guild.id)]["leveling"] is True:
             xp = config.load_xp()
             guild = message.guild
