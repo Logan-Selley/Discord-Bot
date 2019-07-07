@@ -55,7 +55,6 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    print("welcome")
     id = member.guild.id
     msg = setting['guilds'][str(id)]['welcome']
     await member.send(msg)
@@ -63,7 +62,6 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    print("goodbye")
     id = member.guild.id
     msg = setting['guilds'][str(id)]['goodbye']
     await member.send(msg)
@@ -71,7 +69,6 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_message(message):
-    print(message)
     settings = config.load_settings()
     try:
         prefix = settings['guilds'][str(message.guild.id)]['prefix']

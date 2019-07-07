@@ -3,6 +3,7 @@ from discord.ext import commands
 import config
 import json
 import bot
+import utils
 
 
 def setup(bot):
@@ -53,6 +54,8 @@ class Admin(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.command(pass_context=True, name="change_prefix", aliases=["cp"])
     async def change_prefix(self, ctx, prefix="!"):
+        """Changes the server's command prefix to the given string
+        aliases={cp}"""
         settings = config.load_settings()
         guild = ctx.guild.id
         settings['guilds'][str(guild)]['prefix'] = prefix
@@ -60,3 +63,45 @@ class Admin(commands.Cog):
         with open("./settings.json", "w") as f:
             json.dump(settings, f)
         bot.bot.command_prefix = bot.prefix(bot.bot, ctx.message)
+
+    @commands.guild_only()
+    @commands.has_permissions(adminitrator=True)
+    @commands.command(pass_context=True, name="max_volume", aliases=['mv'])
+    async def max_volume(self, ctx, vol: int):
+        """Changes the server's max volume to the given integer
+        aliases={mv}"""
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        settings['guilds'][str(guild)]['max_volume'] = vol
+        await ctx.send("Max volume for this server has been set to: " + str(vol))
+        with open("./settings.json", "w") as f:
+            json.dump(settings, f)
+
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(pass_context=True, name="change_welcome", aliases=['cw'])
+    async def change_welcome(self, ctx, *welcome: str):
+        """Changes the server's welcome message to the given string
+        aliases={cw}"""
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        message = utils.argument_concat(welcome)
+        settings['guilds'][str(guild)]['welcome'] = message
+        await ctx.send("The welcome message for this server has been set to: " + message)
+        with open("./settings.json", "w") as f:
+            json.dump(settings, f)
+
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(pass_context=True, name="change_goodbye", aliases=['cb'])
+    async def change_goodbye(self, ctx, *goodbye: str):
+        """Changes the server's welcome message to the given string
+        aliases={cw}"""
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        message = utils.argument_concat(goodbye)
+        settings['guilds'][str(guild)]['goodbye'] = message
+        await ctx.send("The goodbye message for this server has been set to: " + message)
+        with open("./settings.json", "w") as f:
+            json.dump(settings, f)
+

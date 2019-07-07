@@ -366,6 +366,7 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.check(audio_playing)
+    @commands.check(in_voice)
     @commands.command(name='shuffle', aliases=['sh', 'shuff'])
     async def shuffle(self, ctx):
         """Shuffles the queue order
