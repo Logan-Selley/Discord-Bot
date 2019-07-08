@@ -11,6 +11,7 @@ import utils
 from lyrics_extractor import Song_Lyrics
 from urlvalidator import validate_url, ValidationError
 from spotipy.oauth2 import SpotifyClientCredentials
+import datetime
 
 
 '''
@@ -307,12 +308,18 @@ class Music(commands.Cog):
     def _queue_text(queue):
         messages = []
         if len(queue) > 0:
-            message = discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue:")
+            length = 0
+            for song in queue:
+                length += song.duration
+            length_stamp = datetime.timedelta(seconds=length)
+            message = discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue | "
+                                    + str(length_stamp) + " long")
             field_limit = 25
             current_field = 1
             for (index, song) in enumerate(queue):
+                stamp = datetime.timedelta(seconds=song.duration)
                 value = "[" + song.title + " (requested by " + song.requested_by.display_name + \
-                        ")](" + song.video_url + ")"
+                        ") duration: " + str(stamp) + "](" + song.video_url + ")"
                 if current_field <= field_limit:
                     message.add_field(name=str(index+1) + ": ",
                                       value=value,

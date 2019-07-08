@@ -65,7 +65,7 @@ class Admin(commands.Cog):
         bot.bot.command_prefix = bot.prefix(bot.bot, ctx.message)
 
     @commands.guild_only()
-    @commands.has_permissions(adminitrator=True)
+    @commands.has_permissions(administrator=True)
     @commands.command(pass_context=True, name="max_volume", aliases=['mv'])
     async def max_volume(self, ctx, vol: int):
         """Changes the server's max volume to the given integer
@@ -93,7 +93,7 @@ class Admin(commands.Cog):
 
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.command(pass_context=True, name="change_goodbye", aliases=['cb'])
+    @commands.command(pass_context=True, name="change_goodbye", aliases=['cgb'])
     async def change_goodbye(self, ctx, *goodbye: str):
         """Changes the server's welcome message to the given string
         aliases={cw}"""
