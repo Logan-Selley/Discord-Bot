@@ -158,3 +158,35 @@ class General(commands.Cog):
             await ctx.send('', embed=message)
         else:
             await ctx.send("leveling is currently disabled on this server!")
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="profile", aliases=[])
+    async def profile(self, ctx, member: discord.Member = None):
+        """Displays the given member's info or the callers info if no member is given
+        aliases= {pr}"""
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="server_info", aliases=[])
+    async def server_info(self, ctx):
+        """Displays the info and stats of the current server
+        aliases={si}"""
+
+    @commands.guild_only()
+    @commands.command(pass_context=True, name="settings")
+    async def settings(self, ctx):
+        """Displays the servers settings for me!
+        aliases= {}"""
+        settings = config.load_settings()
+        guild = ctx.guild.id
+        embed = discord.Embed(
+            title=ctx.guild.name + " bot settings!",
+            description="My settings for this server!"
+        )
+        embed.add_field(name="Prefix", value=settings['guilds'][str(guild)]['prefix'])
+        embed.add_field(name="Max Volume", value=str(settings['guilds'][str(guild)]['max_volume']))
+        embed.add_field(name="Leveling system", value=settings['guilds'][str(guild)]['leveling'])
+        embed.add_field(name="Welcome Message", value=settings['guilds'][str(guild)]['welcome'])
+        embed.add_field(name="Goodbye Message", value=settings['guilds'][str(guild)]['goodbye'])
+        embed.add_field(name="Warns until kick", value=str(settings['guilds'][str(guild)]['warn_kick']))
+        embed.add_field(name="Warns until ban", value=str(settings['guilds'][str(guild)]['warn_ban']))
+        await ctx.send("", embed=embed)
