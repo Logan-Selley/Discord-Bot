@@ -166,6 +166,22 @@ class General(commands.Cog):
         aliases= {pr}"""
 
     @commands.guild_only()
+    @commands.command(pass_context=True, name="avatar", aliases=[])
+    async def avatar(self, ctx, user: discord.User = None):
+        """Displays the given user's or the caller's avatar
+        aliases={}"""
+        if user is None:
+            user = ctx.author
+        avatar = user.avatar_url
+        embed = discord.Embed(
+            title=user.name + "'s Avatar:",
+            color=discord.Colour.purple()
+        )
+        embed.set_image(url=avatar)
+        await ctx.send("", embed=embed)
+
+
+    @commands.guild_only()
     @commands.command(pass_context=True, name="server_info", aliases=["si"])
     async def server_info(self, ctx):
         """Displays the info and stats of the current server
