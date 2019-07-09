@@ -166,10 +166,47 @@ class General(commands.Cog):
         aliases= {pr}"""
 
     @commands.guild_only()
-    @commands.command(pass_context=True, name="server_info", aliases=[])
+    @commands.command(pass_context=True, name="server_info", aliases=["si"])
     async def server_info(self, ctx):
         """Displays the info and stats of the current server
         aliases={si}"""
+        guild = ctx.guild
+        boost_count = guild.premium_subscription_count
+        region = str(guild.region)
+        channels = len(guild.channels)
+        vc = len(guild.voice_channels)
+        text_channels = len(guild.text_channels)
+        emoji_limit = guild.emoji_limit
+        bitrate = guild.bitrate_limit
+        filesize = guild.filesize_limit
+        members = str(len(guild.members))
+        owner = guild.owner.name
+        icon = guild.icon_url
+        roles = len(guild.roles)
+        banned = len(await guild.bans())
+        invites = len(await guild.invites())
+        created = str(guild.created_at)
+        embed = discord.Embed(
+            title=guild.name,
+            description="Server Info:",
+            color=discord.Colour.purple()
+        )
+        embed.set_thumbnail(url=icon)
+        embed.add_field(name="Owner: ", value=owner)
+        embed.add_field(name="Region: ", value=region)
+        embed.add_field(name="created at: ", value=created)
+        embed.add_field(name="Boost count: ", value=boost_count)
+        embed.add_field(name="Members: ", value=members)
+        embed.add_field(name="Roles:", value=str(roles))
+        embed.add_field(name="Channels:", value=str(channels))
+        embed.add_field(name="Text Channels:", value=str(text_channels))
+        embed.add_field(name="Voice Channels:", value=str(vc))
+        embed.add_field(name="Emoji Limit:", value=str(emoji_limit))
+        embed.add_field(name="Max Bitrate:", value=bitrate)
+        embed.add_field(name="Max Filesize:", value=filesize)
+        embed.add_field(name="Banned Members:", value=str(banned))
+        embed.add_field(name="Active Invites:", value=str(invites))
+        await ctx.send("", embed=embed)
 
     @commands.guild_only()
     @commands.command(pass_context=True, name="settings")
@@ -180,7 +217,8 @@ class General(commands.Cog):
         guild = ctx.guild.id
         embed = discord.Embed(
             title=ctx.guild.name + " bot settings!",
-            description="My settings for this server!"
+            description="My settings for this server!",
+            color=discord.Colour.purple()
         )
         embed.add_field(name="Prefix", value=settings['guilds'][str(guild)]['prefix'])
         embed.add_field(name="Max Volume", value=str(settings['guilds'][str(guild)]['max_volume']))
