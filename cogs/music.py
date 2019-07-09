@@ -312,8 +312,9 @@ class Music(commands.Cog):
             for song in queue:
                 length += song.duration
             length_stamp = datetime.timedelta(seconds=length)
-            message = discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue | "
-                                    + str(length_stamp) + " long")
+            message = discord.Embed(title='Current Queue', description=(str(len(queue)) + " songs in queue | "
+                                    + str(length_stamp) + " long"),
+                                    color=discord.Color.purple())
             field_limit = 25
             current_field = 1
             for (index, song) in enumerate(queue):
@@ -328,8 +329,8 @@ class Music(commands.Cog):
                 else:
                     messages.append(message)
                     message = discord.Embed(title='Current Queue continued',
-                                            description=str(len(queue)) + " songs in queue:")
-
+                                            description=(str(len(queue)) + " songs in queue:"),
+                                            color=discord.Color.purple())
                     print(song.video_url)
                     message.add_field(name=str(index + 1) + ": ",
                                       value=value,
@@ -338,7 +339,8 @@ class Music(commands.Cog):
             messages.append(message)
             return messages
         else:
-            messages.append(discord.Embed(title='Current Queue', description=str(len(queue)) + " songs in queue:"))
+            messages.append(discord.Embed(title='Current Queue', description=(str(len(queue)) + " songs in queue:"),
+                            color=discord.Color.purple()))
             return messages
 
     @commands.guild_only()

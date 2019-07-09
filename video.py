@@ -51,7 +51,7 @@ class Video:
     def get_embed(self):
         """Makes an embed out of this Video's information."""
         embed = discord.Embed(
-            title=self.title, description=self.uploader, url=self.video_url)
+            title=self.title, description=self.uploader, url=self.video_url, color=discord.Color.purple())
         embed.set_footer(
             text=f"Requested by {self.requested_by.display_name}",
             icon_url=self.requested_by.avatar_url)

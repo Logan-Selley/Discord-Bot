@@ -159,13 +159,14 @@ class General(commands.Cog):
         else:
             await ctx.send("leveling is currently disabled on this server!")
 
-    @commands.guild_only()
     @commands.command(pass_context=True, name="profile", aliases=[])
     async def profile(self, ctx, member: discord.Member = None):
         """Displays the given member's info or the callers info if no member is given
         aliases= {pr}"""
+        if member is None:
+            member = ctx.author
 
-    @commands.guild_only()
+
     @commands.command(pass_context=True, name="avatar", aliases=[])
     async def avatar(self, ctx, user: discord.User = None):
         """Displays the given user's or the caller's avatar
@@ -180,13 +181,13 @@ class General(commands.Cog):
         embed.set_image(url=avatar)
         await ctx.send("", embed=embed)
 
-
     @commands.guild_only()
     @commands.command(pass_context=True, name="server_info", aliases=["si"])
     async def server_info(self, ctx):
         """Displays the info and stats of the current server
         aliases={si}"""
         guild = ctx.guild
+        id = guild.id
         boost_count = guild.premium_subscription_count
         region = str(guild.region)
         channels = len(guild.channels)
@@ -208,6 +209,7 @@ class General(commands.Cog):
             color=discord.Colour.purple()
         )
         embed.set_thumbnail(url=icon)
+        embed.add_field(name="ID:", value=str(id))
         embed.add_field(name="Owner: ", value=owner)
         embed.add_field(name="Region: ", value=region)
         embed.add_field(name="created at: ", value=created)
