@@ -159,13 +159,37 @@ class General(commands.Cog):
         else:
             await ctx.send("leveling is currently disabled on this server!")
 
-    @commands.command(pass_context=True, name="profile", aliases=[])
+    @commands.command(pass_context=True, name="profile", aliases=["pro"])
     async def profile(self, ctx, member: discord.Member = None):
         """Displays the given member's info or the callers info if no member is given
-        aliases= {pr}"""
+        aliases= {pro}"""
         if member is None:
             member = ctx.author
-
+        name = member.display_name
+        id = member.id
+        avatar = member.avatar_url
+        created = member.created_at
+        embed = discord.Embed(
+            title=name,
+            description=name + "'s profile!",
+            color=discord.Colour.purple()
+        )
+        embed.set_thumbnail(url=avatar)
+        embed.add_field(name="ID:", value=str(id))
+        embed.add_field(name="Created At:", value=str(created))
+        if ctx.guild is not None:
+            joined_at = member.joined_at
+            embed.add_field(name="Joined Server At:", value=str(joined_at))
+            if member.bot:
+                embed.add_field(name="Bot?", value="Yeah")
+            if member.premium_since is not None:
+                premium = str(member.premium_since)
+                embed.add_field(name="Premium Member Since: ", value=premium)
+            else:
+                embed.add_field(name="Premium?", value="Nope")
+            top_role = str(member.top_role)
+            embed.add_field(name="Top Role:", value=top_role)
+        await ctx.send("", embed=embed)
 
     @commands.command(pass_context=True, name="avatar", aliases=[])
     async def avatar(self, ctx, user: discord.User = None):
